@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KaliCopilot Web Server - Flask backend for the web UI
+Calci Web Server - Flask backend for the web UI
 Usage: python3 server.py
 Then open: http://localhost:5000
 """
@@ -11,14 +11,27 @@ import subprocess
 import requests
 from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime
+from pathlib import Path
+
+# ── Auto-load .env file ───────────────────────────────────────────────────────
+def load_env():
+    env_path = Path(__file__).parent / ".env"
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
+load_env()
 
 app = Flask(__name__, static_folder=".")
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-MODEL = "meta-llama/llama-3.3-70b-instruct:free"
+MODEL = os.environ.get("MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-SYSTEM_PROMPT = """You are KaliCopilot, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
+SYSTEM_PROMPT = """You are Calci, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
 
 You help with:
 - Reconnaissance and enumeration (nmap, gobuster, enum4linux, etc.)
@@ -65,8 +78,8 @@ def chat():
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://kali-copilot.local",
-        "X-Title": "KaliCopilot"
+        "HTTP-Referer": "https://calci.local",
+        "X-Title": "Calci"
     }
 
     try:
@@ -130,6 +143,6 @@ if __name__ == "__main__":
         print("[!] WARNING: OPENROUTER_API_KEY not set!")
         print("    Set it with: export OPENROUTER_API_KEY=your_key_here")
         print("    Get a free key at: https://openrouter.ai\n")
-    print("[*] Starting KaliCopilot Web UI...")
+    print("[*] Starting Calci Web UI...")
     print("[*] Open your browser at: http://localhost:5000")
     app.run(host="0.0.0.0", port=5000, debug=False)

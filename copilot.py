@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KaliCopilot CLI - AI-powered pentesting assistant via OpenRouter
+Calci CLI - AI-powered pentesting assistant via OpenRouter
 Usage: python3 copilot.py
 """
 
@@ -10,13 +10,26 @@ import json
 import subprocess
 import requests
 from datetime import datetime
+from pathlib import Path
+
+# ── Auto-load .env file ───────────────────────────────────────────────────────
+def load_env():
+    env_path = Path(__file__).parent / ".env"
+    if env_path.exists():
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, value = line.partition("=")
+                    os.environ.setdefault(key.strip(), value.strip())
+load_env()
 
 # ── Config ────────────────────────────────────────────────────────────────────
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-MODEL = "meta-llama/llama-3.3-70b-instruct:free"   # free model on OpenRouter
+MODEL = os.environ.get("MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-SYSTEM_PROMPT = """You are KaliCopilot, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
+SYSTEM_PROMPT = """You are Calci, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
 
 You help with:
 - Reconnaissance and enumeration (nmap, gobuster, enum4linux, etc.)
@@ -81,8 +94,8 @@ def chat(user_message):
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
-        "HTTP-Referer": "https://kali-copilot.local",
-        "X-Title": "KaliCopilot"
+        "HTTP-Referer": "https://calci.local",
+        "X-Title": "Calci"
     }
 
     try:
@@ -124,7 +137,7 @@ def save_session():
 
 def print_help():
     print(f"""
-{C.CYAN}━━━ KaliCopilot Commands ━━━{C.RESET}
+{C.CYAN}━━━ Calci Commands ━━━{C.RESET}
   {C.GREEN}run <cmd>{C.RESET}     Execute a tool and analyze output with AI
                   e.g. run nmap -sV -p 80,443 192.168.1.1
   {C.GREEN}analyze{C.RESET}       Paste tool output for AI analysis (end with END)
@@ -143,7 +156,7 @@ def print_help():
 
 def print_response(text):
     """Pretty print AI response."""
-    print(f"\n{C.CYAN}┌─ KaliCopilot ─────────────────────────────────────────{C.RESET}")
+    print(f"\n{C.CYAN}┌─ Calci ─────────────────────────────────────────{C.RESET}")
     # Simple markdown-like formatting
     for line in text.split("\n"):
         if line.startswith("```"):
@@ -171,7 +184,7 @@ def main():
 
     while True:
         try:
-            user_input = input(f"{C.RED}kali-copilot{C.RESET}{C.GRAY}>{C.RESET} ").strip()
+            user_input = input(f"{C.RED}calci{C.RESET}{C.GRAY}>{C.RESET} ").strip()
         except (KeyboardInterrupt, EOFError):
             print(f"\n{C.GRAY}[*] Exiting. Stay ethical.{C.RESET}")
             break
