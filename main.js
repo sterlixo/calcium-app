@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron')
 const { spawn } = require('child_process')
 const path = require('path')
 
-// Force consistent zoom regardless of how app is launched (terminal vs desktop icon)
+// Force consistent zoom regardless of how app is launched
 app.commandLine.appendSwitch('force-device-scale-factor', '1')
 
 let win, server
@@ -12,14 +12,8 @@ function startFlask() {
     cwd: __dirname,
     env: { ...process.env }
   })
-
-  server.stdout.on('data', (data) => {
-    console.log(`Flask: ${data}`)
-  })
-
-  server.stderr.on('data', (data) => {
-    console.error(`Flask error: ${data}`)
-  })
+  server.stdout.on('data', (data) => { console.log(`Flask: ${data}`) })
+  server.stderr.on('data', (data) => { console.error(`Flask error: ${data}`) })
 }
 
 function createWindow() {
@@ -29,22 +23,25 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     title: 'Calcium — AI Pentesting Assistant',
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#080c10',
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      // Disable cache so UI always loads fresh
+      cache: false
     },
-    // Frameless titlebar on Linux
     frame: true,
     show: false
   })
 
   win.setMenuBarVisibility(false)
 
-  // Try to load, retry until Flask is ready
   function tryLoad(retries = 10) {
-    win.loadURL('http://localhost:5000').then(() => {
-      win.webContents.setZoomFactor(1.5)  // Force consistent zoom level always
+    // Force bypass cache every load
+    win.loadURL('http://localhost:5000', {
+      extraHeaders: 'pragma: no-cache\nCache-Control: no-cache\n'
+    }).then(() => {
+      win.webContents.setZoomFactor(1.5)
       win.show()
     }).catch(() => {
       if (retries > 0) {
@@ -57,7 +54,6 @@ function createWindow() {
   }
 
   setTimeout(() => tryLoad(), 1500)
-
   win.on('closed', () => { win = null })
 }
 
