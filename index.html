@@ -601,6 +601,92 @@ header {
   box-shadow:0 0 16px rgba(0,200,255,0.3);
 }
 .send-btn:disabled { opacity:0.35; cursor:not-allowed; }
+
+  /* ── ADMIN MODAL ── */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.75);
+    z-index:9000; align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--bg2);
+    border:1px solid var(--border2);
+    width:100%; max-width:540px;
+    max-height:80vh;
+    display:flex; flex-direction:column;
+    box-shadow:0 0 60px rgba(0,200,255,0.1);
+    animation:fadeUp 0.2s ease;
+  }
+  .modal-head {
+    padding:14px 20px;
+    border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+    flex-shrink:0;
+  }
+  .modal-title {
+    font-family:var(--display);
+    font-size:0.85rem; font-weight:700;
+    color:var(--cyan); letter-spacing:3px; text-transform:uppercase;
+  }
+  .modal-close {
+    background:transparent; border:1px solid var(--border);
+    color:var(--text); font-family:var(--mono);
+    font-size:0.75rem; padding:3px 10px; cursor:pointer;
+    transition:all 0.15s;
+  }
+  .modal-close:hover { border-color:var(--red); color:var(--red); }
+  .modal-body { padding:20px; overflow-y:auto; flex:1; }
+  .modal-section { margin-bottom:20px; }
+  .modal-section-title {
+    font-size:0.65rem; color:var(--dim);
+    letter-spacing:2px; text-transform:uppercase;
+    margin-bottom:10px; padding-bottom:5px;
+    border-bottom:1px solid var(--border);
+  }
+  .modal-row { display:flex; gap:8px; margin-bottom:8px; }
+  .modal-input {
+    flex:1; background:var(--bg3); border:1px solid var(--border);
+    color:var(--text); font-family:var(--mono); font-size:0.82rem;
+    padding:7px 10px; outline:none; transition:border 0.15s;
+  }
+  .modal-input:focus { border-color:rgba(0,200,255,0.4); }
+  .modal-input::placeholder { color:var(--text-dim); }
+  .modal-select {
+    background:var(--bg3); border:1px solid var(--border);
+    color:var(--text); font-family:var(--mono); font-size:0.82rem;
+    padding:7px 10px; outline:none; cursor:pointer; min-width:90px;
+  }
+  .modal-btn {
+    background:rgba(0,200,255,0.08); border:1px solid var(--cyan-dim);
+    color:var(--cyan); font-family:var(--mono); font-size:0.75rem;
+    padding:7px 14px; cursor:pointer; letter-spacing:1px;
+    transition:all 0.15s; text-transform:uppercase; white-space:nowrap;
+  }
+  .modal-btn:hover { background:var(--cyan); color:var(--bg); }
+  .modal-msg {
+    font-size:0.75rem; padding:7px 10px; margin-bottom:10px;
+    border-radius:2px; display:none;
+  }
+  .modal-msg.ok  { background:rgba(0,255,136,0.08); border:1px solid rgba(0,255,136,0.2); color:#00ff88; display:block; }
+  .modal-msg.err { background:rgba(255,50,80,0.08); border:1px solid rgba(255,50,80,0.2); color:#ff4466; display:block; }
+  .user-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+  .user-table th {
+    text-align:left; padding:5px 8px;
+    color:var(--dim); font-size:0.62rem; letter-spacing:1px;
+    border-bottom:1px solid var(--border); font-weight:normal; text-transform:uppercase;
+  }
+  .user-table td { padding:7px 8px; border-bottom:1px solid rgba(0,200,255,0.04); }
+  .user-table tr:hover td { background:rgba(0,200,255,0.03); }
+  .utag {
+    font-size:0.6rem; padding:2px 6px; border-radius:10px;
+    letter-spacing:0.5px; text-transform:uppercase;
+  }
+  .utag-admin { background:rgba(255,170,0,0.1); color:#ffaa00; border:1px solid rgba(255,170,0,0.2); }
+  .utag-user  { background:rgba(0,200,255,0.08); color:var(--cyan-dim); border:1px solid var(--border); }
+  .udel { background:transparent; border:1px solid rgba(255,50,80,0.2); color:rgba(255,80,100,0.5);
+    font-family:var(--mono); font-size:0.62rem; padding:2px 7px; cursor:pointer; transition:all 0.15s; }
+  .udel:hover { border-color:var(--red); color:var(--red); background:rgba(255,50,80,0.08); }
 </style>
 </head>
 <body>
@@ -609,10 +695,10 @@ header {
   <div class="logo">CAL<em>CIUM</em></div>
   <div class="status-badge"><div class="status-dot"></div>SYSTEM ONLINE</div>
   <div class="header-right">
-    <button class="hbtn" id="adminBtn" onclick="window.location.href='/login'" style="display:none">[ ADMIN ]</button>
+    <button class="hbtn" id="adminBtn" onclick="openAdmin()" style="display:none">[ ADMIN ]</button>
     <button class="hbtn" onclick="clearSession()">[ CLEAR ]</button>
     <button class="hbtn" onclick="exportSession()">[ EXPORT ]</button>
-    <button class="hbtn" style="border-color:rgba(255,50,80,0.3);color:rgba(255,80,100,0.6)" onclick="doLogout()">[ LOGOUT ]</button>
+    <button class="hbtn" id="logoutBtn" onclick="doLogout()" style="border-color:rgba(255,50,80,0.3);color:rgba(255,80,100,0.6);display:none">[ LOGOUT ]</button>
   </div>
 </header>
 
@@ -963,7 +1049,7 @@ async function runCommand() {
   try {
     const resp = await fetch('/api/run', {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: authHeaders(),
       body: JSON.stringify({ command })
     });
     const data = await resp.json();
@@ -1084,7 +1170,7 @@ async function sendMessage(content = null) {
   try {
     const resp = await fetch('/api/chat', {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers: authHeaders(),
       body: JSON.stringify({ message, session_id: sessionId, model: getModel() })
     });
     const data = await resp.json();
@@ -1138,41 +1224,163 @@ async function exportSession() {
 }
 
 
-// ── AUTH CHECK ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════
+// AUTH
+// ═══════════════════════════════════
 const TOKEN_KEY = 'calcium_token';
-function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
+function getToken()    { return localStorage.getItem(TOKEN_KEY) || ''; }
 function getUsername() { return localStorage.getItem('calcium_user') || 'USER'; }
-function getRole() { return localStorage.getItem('calcium_role') || 'user'; }
+function getRole()     { return localStorage.getItem('calcium_role') || 'user'; }
+function authHeaders() { return { 'Content-Type': 'application/json', 'X-Auth-Token': getToken() }; }
 
 async function checkAuth() {
   const token = getToken();
   if (!token) { window.location.href = '/login'; return; }
-  const resp = await fetch('/api/auth/verify', { headers: { 'X-Auth-Token': token } });
-  const data = await resp.json();
-  if (!data.valid) { localStorage.clear(); window.location.href = '/login'; }
-  // Show username and role in header
-  const statusEl = document.querySelector('.status-badge span');
-  if (statusEl) statusEl.textContent = getUsername().toUpperCase() + ' · ONLINE';
-  // Show admin button if admin
-  if (getRole() === 'admin') {
-    const adminBtn = document.getElementById('adminBtn');
-    if (adminBtn) adminBtn.style.display = '';
+  try {
+    const resp = await fetch('/api/auth/verify', { headers: { 'X-Auth-Token': token } });
+    const data = await resp.json();
+    if (!data.valid) { localStorage.clear(); window.location.href = '/login'; return; }
+    // Update header status
+    const statusEl = document.querySelector('.status-badge span');
+    if (statusEl) statusEl.textContent = getUsername().toUpperCase() + ' · ONLINE';
+    // Show buttons
+    document.getElementById('logoutBtn').style.display = '';
+    if (getRole() === 'admin') document.getElementById('adminBtn').style.display = '';
+  } catch(e) {
+    // If server unreachable, just continue (Electron offline scenario)
   }
 }
 
 async function doLogout() {
-  await fetch('/api/auth/logout', { method: 'POST', headers: { 'X-Auth-Token': getToken() } });
+  try {
+    await fetch('/api/auth/logout', { method:'POST', headers:{ 'X-Auth-Token': getToken() } });
+  } catch(e) {}
   localStorage.clear();
   window.location.href = '/login';
 }
 
-function authHeaders() {
-  return { 'Content-Type': 'application/json', 'X-Auth-Token': getToken() };
+// ── Admin modal ───────────────────────────────────────────────────────────────
+function openAdmin() {
+  document.getElementById('adminModal').classList.add('open');
+  loadAdminUsers();
+}
+function closeAdmin() {
+  document.getElementById('adminModal').classList.remove('open');
+}
+
+async function loadAdminUsers() {
+  const tbody = document.getElementById('adminUsersList');
+  try {
+    const resp = await fetch('/api/auth/users', { headers: { 'X-Auth-Token': getToken() } });
+    const data = await resp.json();
+    if (data.error || !data.users) {
+      tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red);text-align:center;padding:12px">${data.error || 'Failed to load'}</td></tr>`;
+      return;
+    }
+    const me = getUsername();
+    tbody.innerHTML = data.users.map(u => `
+      <tr>
+        <td style="color:var(--cyan);font-weight:600">${u.username}</td>
+        <td><span class="utag utag-${u.role}">${u.role}</span></td>
+        <td style="color:var(--dim);font-size:0.7rem">${u.last_login ? u.last_login.slice(0,16).replace('T',' ') : 'Never'}</td>
+        <td>${u.username !== me
+          ? `<button class="udel" onclick="adminDeleteUser('${u.username}')">DEL</button>`
+          : `<span style="color:var(--dim);font-size:0.65rem">(you)</span>`}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red);text-align:center;padding:12px">Connection error</td></tr>`;
+  }
+}
+
+async function adminCreateUser() {
+  const username = document.getElementById('muUsername').value.trim();
+  const password = document.getElementById('muPassword').value;
+  const role     = document.getElementById('muRole').value;
+  const msg      = document.getElementById('adminModalMsg');
+
+  if (!username || !password) {
+    msg.className = 'modal-msg err'; msg.textContent = 'Username and password required'; return;
+  }
+  try {
+    const resp = await fetch('/api/auth/users/create', {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ username, password, role })
+    });
+    const data = await resp.json();
+    msg.className = `modal-msg ${data.success ? 'ok' : 'err'}`;
+    msg.textContent = data.message || data.error;
+    if (data.success) {
+      document.getElementById('muUsername').value = '';
+      document.getElementById('muPassword').value = '';
+      loadAdminUsers();
+    }
+  } catch(e) { msg.className='modal-msg err'; msg.textContent='Connection error'; }
+}
+
+async function adminDeleteUser(username) {
+  if (!confirm(`Delete user "${username}"? This cannot be undone.`)) return;
+  const msg = document.getElementById('adminModalMsg');
+  try {
+    const resp = await fetch('/api/auth/users/delete', {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ username })
+    });
+    const data = await resp.json();
+    msg.className = `modal-msg ${data.success ? 'ok' : 'err'}`;
+    msg.textContent = data.message || data.error;
+    if (data.success) loadAdminUsers();
+  } catch(e) { msg.className='modal-msg err'; msg.textContent='Connection error'; }
 }
 
 checkAuth();
 
 initTools();
 </script>
+
+<!-- ADMIN MODAL -->
+<div class="modal-overlay" id="adminModal" onclick="if(event.target===this)closeAdmin()">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">⚙ User Management</div>
+      <button class="modal-close" onclick="closeAdmin()">✕ CLOSE</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <div class="modal-section-title">Create New User</div>
+        <div class="modal-msg" id="adminModalMsg"></div>
+        <div class="modal-row">
+          <input class="modal-input" type="text" id="muUsername" placeholder="Username">
+          <input class="modal-input" type="password" id="muPassword" placeholder="Password">
+          <select class="modal-select" id="muRole">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+          <button class="modal-btn" onclick="adminCreateUser()">ADD</button>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-title">All Users</div>
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Last Login</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="adminUsersList">
+            <tr><td colspan="4" style="color:var(--dim);text-align:center;padding:12px">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
