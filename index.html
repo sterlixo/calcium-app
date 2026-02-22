@@ -421,15 +421,7 @@
   <div class="logo">CAL<span>CIUM</span></div>
   <div class="status"><div class="dot"></div><span>SYSTEM ONLINE</span></div>
   <div class="header-actions">
-    <select id="modelSelect">
-      <option value="openrouter/free">Auto (Best Available Free) ★ Default</option>
-      <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (Free)</option>
-      <option value="google/gemini-2.0-flash-exp:free">Gemini 2.0 Flash (Free)</option>
-      <option value="deepseek/deepseek-r1:free">DeepSeek R1 (Free)</option>
-      <option value="mistralai/mistral-small-3.1-24b-instruct:free">Mistral Small 3.1 (Free)</option>
-      <option value="qwen/qwen-2.5-72b-instruct:free">Qwen 2.5 72B (Free)</option>
-      <option value="nvidia/llama-3.1-nemotron-nano-8b-v1:free">Nvidia Nemotron 8B (Free)</option>
-    </select>
+
     <button class="btn" onclick="clearSession()">[ CLEAR ]</button>
     <button class="btn" onclick="exportSession()">[ EXPORT ]</button>
   </div>
@@ -762,7 +754,7 @@ async function runCommand() {
 const sessionId = 'session_' + Date.now();
 let isLoading = false;
 
-function getModel() { return document.getElementById('modelSelect').value; }
+function getModel() { return 'openrouter/free'; }
 function timestamp() { return new Date().toLocaleTimeString('en-US', {hour12: false}); }
 
 function addMessage(role, content) {
