@@ -572,17 +572,8 @@ function showMsg(el, type, text) {
   el.textContent = text;
 }
 
-// Show admin tab if logged in as admin
-function checkAdminAccess() {
-  const role = localStorage.getItem('calcium_role');
-  if (role === 'admin') {
-    document.getElementById('adminTab').style.display = '';
-  }
-}
-
 // ── Init ──────────────────────────────────────────────────────────────────────
 checkExistingSession();
-checkAdminAccess();
 </script>
 </body>
 </html>

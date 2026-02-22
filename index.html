@@ -1240,14 +1240,19 @@ async function checkAuth() {
     const resp = await fetch('/api/auth/verify', { headers: { 'X-Auth-Token': token } });
     const data = await resp.json();
     if (!data.valid) { localStorage.clear(); window.location.href = '/login'; return; }
+    // Always update role/username from server (source of truth)
+    localStorage.setItem('calcium_role', data.role || 'user');
+    localStorage.setItem('calcium_user', data.username || 'USER');
     // Update header status
     const statusEl = document.querySelector('.status-badge span');
-    if (statusEl) statusEl.textContent = getUsername().toUpperCase() + ' · ONLINE';
+    if (statusEl) statusEl.textContent = (data.username || 'USER').toUpperCase() + ' · ONLINE';
     // Show buttons
     document.getElementById('logoutBtn').style.display = '';
-    if (getRole() === 'admin') document.getElementById('adminBtn').style.display = '';
+    if (data.role === 'admin') document.getElementById('adminBtn').style.display = '';
   } catch(e) {
-    // If server unreachable, just continue (Electron offline scenario)
+    // If server unreachable, fall back to localStorage
+    document.getElementById('logoutBtn').style.display = '';
+    if (getRole() === 'admin') document.getElementById('adminBtn').style.display = '';
   }
 }
 
