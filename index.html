@@ -247,37 +247,60 @@
   .terminal-col .col-header { color: #44ddff; }
   .terminal-col .col-dot { background: #44ddff; box-shadow: 0 0 6px #44ddff; }
 
+  /* ── Top pane: command runner ── */
+  .term-top-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-bottom: 2px solid rgba(0,212,255,0.3);
+  }
+  .term-pane-header {
+    padding: 4px 14px;
+    font-size: 0.62rem;
+    letter-spacing: 2px;
+    color: rgba(0,212,255,0.5);
+    background: rgba(0,180,255,0.04);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+  }
+  .pane-dot { width: 5px; height: 5px; border-radius: 50%; }
+
   #termOutput {
     flex: 1;
     overflow-y: auto;
-    padding: 12px 14px;
-    font-size: 0.95rem;
+    padding: 10px 14px;
+    font-size: 0.88rem;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
   }
   #termOutput::-webkit-scrollbar { width: 4px; }
   #termOutput::-webkit-scrollbar-thumb { background: var(--green-dark); }
 
   .term-entry { animation: msgIn 0.2s ease; }
-  .term-cmd { color: #44ddff; margin-bottom: 4px; }
+  .term-cmd { color: #44ddff; margin-bottom: 3px; font-size: 0.88rem; }
   .term-cmd::before { content: '$ '; color: rgba(0,200,255,0.6); }
   .term-out {
     white-space: pre-wrap;
-    word-break: break-all;
+    word-break: break-word;
     color: #a0d8ff;
-    font-size: 0.9rem;
-    padding: 8px 10px;
+    font-size: 0.83rem;
+    padding: 6px 10px;
     background: #020c1a;
-    border-left: 2px solid rgba(0,212,255,0.15);
-    max-height: 300px;
+    border-left: 2px solid rgba(0,212,255,0.2);
+    max-height: 200px;
     overflow-y: auto;
   }
   .term-err { color: var(--red); }
-  .term-info { color: rgba(0,212,255,0.4); font-size: 0.85rem; font-style: italic; }
+  .term-info { color: rgba(0,212,255,0.4); font-size: 0.8rem; font-style: italic; }
 
   .term-input-area {
-    padding: 10px 14px;
+    padding: 8px 14px;
     border-top: 1px solid var(--border);
     background: var(--bg2);
     display: flex;
@@ -285,7 +308,7 @@
     align-items: center;
     flex-shrink: 0;
   }
-  .term-prompt { color: #44ddff; font-size: 1rem; flex-shrink: 0; }
+  .term-prompt { color: #44ddff; font-size: 0.95rem; flex-shrink: 0; }
 
   #cmdInput {
     flex: 1;
@@ -294,7 +317,9 @@
     border-bottom: 1px solid rgba(0,180,255,0.3);
     color: #44ddff;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    padding: 2px 0;
+    outline: none;
   }
   #cmdInput::placeholder { color: rgba(0,180,255,0.25); }
   #cmdInput:focus { border-bottom-color: rgba(0,200,255,0.7); }
@@ -304,10 +329,61 @@
     border: 1px solid rgba(0,180,255,0.35);
     color: #44ddff;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    padding: 3px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
   }
   .run-btn:hover { border-color: #44ddff; box-shadow: 0 0 8px rgba(0,180,255,0.35); }
   .run-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── Bottom pane: activity log ── */
+  .term-bottom-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #000d1a;
+  }
+  #activityLog {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-family: 'Share Tech Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  #activityLog::-webkit-scrollbar { width: 3px; }
+  #activityLog::-webkit-scrollbar-thumb { background: var(--green-dark); }
+
+  .log-entry {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(0,180,255,0.04);
+    animation: msgIn 0.15s ease;
+    line-height: 1.4;
+  }
+  .log-time { color: rgba(0,180,255,0.35); flex-shrink: 0; font-size: 0.7rem; }
+  .log-type {
+    flex-shrink: 0;
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    min-width: 36px;
+    text-align: center;
+  }
+  .log-type.cmd  { background: rgba(0,180,255,0.15); color: #44ddff; }
+  .log-type.ok   { background: rgba(0,200,100,0.15); color: #4caf50; }
+  .log-type.err  { background: rgba(255,50,80,0.15);  color: #ff4466; }
+  .log-type.ai   { background: rgba(0,212,255,0.1);   color: #00d4ff; }
+  .log-type.info { background: rgba(255,200,0,0.1);   color: #f0a500; }
+  .log-msg { color: rgba(180,220,255,0.65); flex: 1; word-break: break-word; font-size: 0.73rem; }
 
   /* ── Chat column ── */
   .chat-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -429,26 +505,47 @@
   <!-- Split columns -->
   <div class="columns">
 
-    <!-- LEFT: Terminal -->
+    <!-- LEFT: Terminal (split top/bottom) -->
     <div class="terminal-col">
       <div class="col-header">
         <div class="col-dot"></div>
         TERMINAL
       </div>
-      <div id="termOutput">
-        <div class="term-welcome">
-          ┌─────────────────────────────────┐<br>
-          │  CALCIUM TERMINAL  v2.0         │<br>
-          │  Run-only · No AI analysis      │<br>
-          └─────────────────────────────────┘<br>
-          Type a command and press ENTER or [ RUN ]
+
+      <!-- TOP: Command Runner -->
+      <div class="term-top-pane">
+        <div class="term-pane-header">
+          <div class="pane-dot" style="background:#44ddff;"></div>
+          RUN COMMANDS
+        </div>
+        <div id="termOutput">
+          <div class="term-welcome">
+            ┌──(kali㉿calcium)-[~]<br>
+            └─$ Ready — type a command below
+          </div>
+        </div>
+        <div class="term-input-area">
+          <span class="term-prompt">$</span>
+          <input type="text" id="cmdInput" placeholder="nmap -sV 192.168.1.1" onkeydown="handleCmdKey(event)" autocomplete="off" spellcheck="false" />
+          <button class="run-btn" id="runBtn" onclick="runCommand()">[ RUN ]</button>
         </div>
       </div>
-      <div class="term-input-area">
-        <span class="term-prompt">$</span>
-        <input type="text" id="cmdInput" placeholder="nmap -sV 192.168.1.1" onkeydown="handleCmdKey(event)" autocomplete="off" spellcheck="false" />
-        <button class="run-btn" id="runBtn" onclick="runCommand()">[ RUN ]</button>
+
+      <!-- BOTTOM: Activity Log -->
+      <div class="term-bottom-pane">
+        <div class="term-pane-header">
+          <div class="pane-dot" style="background:#f0a500;"></div>
+          ACTIVITY LOG
+        </div>
+        <div id="activityLog">
+          <div class="log-entry">
+            <span class="log-time">--:--:--</span>
+            <span class="log-type info">INFO</span>
+            <span class="log-msg">Calcium started. All actions will be logged here.</span>
+          </div>
+        </div>
       </div>
+
     </div>
 
     <!-- RIGHT: AI Chat -->
@@ -665,6 +762,23 @@ function renderTools() {
 }
 
 // ═══════════════════════════════════
+// ACTIVITY LOG
+// ═══════════════════════════════════
+function logActivity(type, msg) {
+  const log = document.getElementById('activityLog');
+  const now = new Date().toLocaleTimeString('en-US', {hour12: false});
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `
+    <span class="log-time">${now}</span>
+    <span class="log-type ${type}">${type.toUpperCase()}</span>
+    <span class="log-msg">${escapeHtml(msg)}</span>
+  `;
+  log.appendChild(entry);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ═══════════════════════════════════
 // TERMINAL
 // ═══════════════════════════════════
 let cmdHistory = [];
@@ -710,6 +824,7 @@ async function runCommand() {
   out.appendChild(entry);
   out.scrollTop = out.scrollHeight;
 
+  logActivity('cmd', command);
   document.getElementById('runBtn').disabled = true;
 
   try {
@@ -722,12 +837,16 @@ async function runCommand() {
 
     if (data.error) {
       entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}</div><div class="term-out term-err">⚠ ${escapeHtml(data.error)}</div>`;
+      logActivity('err', data.error);
     } else {
       const rc = data.returncode !== undefined ? ` <span style="color:rgba(0,180,255,0.35);font-size:0.65rem">[exit ${data.returncode}]</span>` : '';
       entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}${rc}</div><div class="term-out">${escapeHtml(data.output)}</div>`;
+      const lines = data.output.trim().split('\n').length;
+      logActivity('ok', `exit ${data.returncode} · ${lines} line(s) of output`);
     }
   } catch (e) {
     entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}</div><div class="term-out term-err">⚠ Connection error: ${escapeHtml(e.message)}</div>`;
+    logActivity('err', 'Connection error: ' + e.message);
   }
 
   document.getElementById('runBtn').disabled = false;
@@ -822,6 +941,7 @@ async function sendMessage(content = null) {
 
   input.value = '';
   addMessage('user', message);
+  logActivity('ai', 'Query sent: ' + message.substring(0, 60) + (message.length > 60 ? '...' : ''));
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
   addTyping();
@@ -834,10 +954,17 @@ async function sendMessage(content = null) {
     });
     const data = await resp.json();
     removeTyping();
-    addMessage('ai', data.error ? `⚠️ **Error:** ${data.error}` : data.reply);
+    if (data.error) {
+      addMessage('ai', `⚠️ **Error:** ${data.error}`);
+      logActivity('err', 'AI error: ' + data.error);
+    } else {
+      addMessage('ai', data.reply);
+      logActivity('ai', 'AI responded · ' + data.reply.length + ' chars');
+    }
   } catch (e) {
     removeTyping();
     addMessage('ai', `⚠️ **Connection error:** ${e.message}`);
+    logActivity('err', 'AI connection error: ' + e.message);
   }
 
   isLoading = false;
