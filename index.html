@@ -35,23 +35,18 @@
     overflow: hidden;
   }
 
-  /* Scanline effect */
   body::before {
     content: '';
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
+      0deg, transparent, transparent 2px,
+      rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px
     );
     pointer-events: none;
     z-index: 1000;
   }
 
-  /* CRT flicker */
   @keyframes flicker {
     0%,100% { opacity: 1; }
     92% { opacity: 1; }
@@ -62,9 +57,9 @@
   }
   body { animation: flicker 8s infinite; }
 
-  /* Header */
+  /* ── Header ── */
   header {
-    padding: 12px 20px;
+    padding: 10px 20px;
     border-bottom: 1px solid var(--border);
     background: var(--bg2);
     display: flex;
@@ -75,412 +70,356 @@
 
   .logo {
     font-family: 'Orbitron', monospace;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-weight: 900;
     color: var(--green);
     text-shadow: 0 0 20px var(--green), 0 0 40px rgba(0,255,65,0.4);
     letter-spacing: 2px;
   }
-
   .logo span { color: var(--red); }
 
-  .status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.75rem;
-    color: var(--green-dim);
-  }
-
+  .status { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--green-dim); }
   .dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 8px var(--green);
     animation: pulse 2s infinite;
   }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-  @keyframes pulse {
-    0%,100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .header-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
+  .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; }
 
   select {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--green);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    padding: 5px 10px;
-    cursor: pointer;
-    outline: none;
+    background: var(--bg3); border: 1px solid var(--border);
+    color: var(--green); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; padding: 5px 10px; cursor: pointer; outline: none;
   }
-
   select:focus { border-color: var(--green); }
 
   .btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--green-dim);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    padding: 5px 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 1px;
+    background: transparent; border: 1px solid var(--border);
+    color: var(--green-dim); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem; padding: 5px 12px; cursor: pointer;
+    transition: all 0.2s; letter-spacing: 1px;
   }
+  .btn:hover { border-color: var(--green); color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
 
-  .btn:hover {
-    border-color: var(--green);
-    color: var(--green);
-    box-shadow: 0 0 10px var(--green-glow);
-  }
+  /* ── Main layout ── */
+  .main { display: flex; flex: 1; overflow: hidden; }
 
-  /* Layout */
-  .main {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  /* Sidebar */
+  /* ── Sidebar — Kali Tools Reference ── */
   .sidebar {
-    width: 220px;
+    width: 225px;
     border-right: 1px solid var(--border);
     background: var(--bg2);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
-  .sidebar-section {
-    padding: 12px;
+  .sidebar-header {
+    padding: 8px 10px;
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
 
   .sidebar-title {
     font-family: 'Orbitron', monospace;
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     color: var(--green-dim);
     letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
   }
 
-  .quick-btn {
-    display: block;
+  .tools-search-input {
     width: 100%;
-    text-align: left;
-    background: transparent;
-    border: 1px solid transparent;
-    color: var(--text);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--green);
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.7rem;
+    padding: 4px 8px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .tools-search-input::placeholder { color: rgba(0,255,65,0.2); }
+  .tools-search-input:focus { border-color: var(--green); }
+
+  .cat-filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
     padding: 5px 8px;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-bottom: 3px;
-    line-height: 1.4;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
 
-  .quick-btn:hover {
-    border-color: var(--border);
+  .cat-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: rgba(0,255,65,0.35);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.56rem;
+    padding: 2px 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cat-btn:hover, .cat-btn.active {
+    border-color: var(--green);
     color: var(--green);
     background: var(--green-glow);
   }
 
-  .quick-btn::before { content: '> '; color: var(--green-dim); }
-
-  /* Chat area */
-  .chat-area {
+  .tools-list {
     flex: 1;
+    overflow-y: auto;
+    padding: 5px 7px;
+  }
+  .tools-list::-webkit-scrollbar { width: 3px; }
+  .tools-list::-webkit-scrollbar-thumb { background: var(--green-dark); }
+
+  .tool-cat-header {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.48rem;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    padding: 7px 3px 3px;
+    border-bottom: 1px solid rgba(0,255,65,0.1);
+    margin-bottom: 2px;
+  }
+
+  .tool-item {
+    padding: 4px 5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    margin-bottom: 1px;
+  }
+  .tool-item:hover { border-color: var(--border); background: var(--green-glow); }
+  .tool-item:hover .tool-name { color: var(--green); }
+
+  .tool-name {
+    font-size: 0.7rem;
+    color: var(--green-dim);
+    transition: color 0.15s;
+  }
+  .tool-name::before { content: '$ '; color: rgba(0,255,65,0.25); font-size: 0.63rem; }
+
+  .tool-purpose {
+    font-size: 0.61rem;
+    color: rgba(176,255,184,0.42);
+    line-height: 1.3;
+    margin-top: 1px;
+    padding-left: 10px;
+  }
+
+  .no-results {
+    color: rgba(0,255,65,0.2);
+    font-size: 0.7rem;
+    text-align: center;
+    padding: 20px 10px;
+    font-style: italic;
+  }
+
+  /* ── Split columns ── */
+  .columns { display: flex; flex: 1; overflow: hidden; }
+
+  /* ── Col headers ── */
+  .col-header {
+    padding: 7px 14px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    letter-spacing: 2px;
+  }
+  .col-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+  /* ── Terminal column ── */
+  .terminal-col {
+    width: 50%;
+    border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background: #000501;
   }
+  .terminal-col .col-header { color: var(--yellow); }
+  .terminal-col .col-dot { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
 
-  #messages {
+  #termOutput {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 12px 14px;
+    font-size: 0.75rem;
+    line-height: 1.6;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    scroll-behavior: smooth;
+    gap: 10px;
   }
+  #termOutput::-webkit-scrollbar { width: 4px; }
+  #termOutput::-webkit-scrollbar-thumb { background: var(--green-dark); }
 
+  .term-entry { animation: msgIn 0.2s ease; }
+  .term-cmd { color: var(--yellow); margin-bottom: 4px; }
+  .term-cmd::before { content: '$ '; color: rgba(255,204,0,0.5); }
+  .term-out {
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #6ddd6d;
+    font-size: 0.72rem;
+    padding: 8px 10px;
+    background: #000;
+    border-left: 2px solid rgba(0,255,65,0.15);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .term-err { color: var(--red); }
+  .term-info { color: rgba(0,255,65,0.4); font-size: 0.68rem; font-style: italic; }
+
+  .term-input-area {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .term-prompt { color: var(--yellow); font-size: 0.8rem; flex-shrink: 0; }
+
+  #cmdInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255,204,0,0.25);
+    color: var(--yellow);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    padding: 4px 0;
+    outline: none;
+  }
+  #cmdInput::placeholder { color: rgba(255,204,0,0.2); }
+  #cmdInput:focus { border-bottom-color: rgba(255,204,0,0.6); }
+
+  .run-btn {
+    background: transparent;
+    border: 1px solid rgba(255,204,0,0.3);
+    color: var(--yellow);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 12px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .run-btn:hover { border-color: var(--yellow); box-shadow: 0 0 8px rgba(255,204,0,0.2); }
+  .run-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* ── Chat column ── */
+  .chat-col { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .chat-col .col-header { color: var(--green); }
+  .chat-col .col-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
+
+  #messages {
+    flex: 1; overflow-y: auto; padding: 16px;
+    display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth;
+  }
   #messages::-webkit-scrollbar { width: 4px; }
-  #messages::-webkit-scrollbar-track { background: var(--bg); }
   #messages::-webkit-scrollbar-thumb { background: var(--green-dark); }
 
-  .message {
-    display: flex;
-    gap: 12px;
-    animation: msgIn 0.3s ease;
-  }
-
   @keyframes msgIn {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
+  .message { display: flex; gap: 10px; animation: msgIn 0.3s ease; }
   .msg-icon {
-    width: 32px; height: 32px;
-    border: 1px solid var(--border);
+    width: 28px; height: 28px; border: 1px solid var(--border);
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.9rem;
-    flex-shrink: 0;
-    margin-top: 2px;
+    font-size: 0.85rem; flex-shrink: 0; margin-top: 2px;
   }
-
   .user-msg .msg-icon { border-color: rgba(255,204,0,0.3); color: var(--yellow); }
   .ai-msg .msg-icon { border-color: var(--border); color: var(--green); box-shadow: 0 0 8px var(--green-glow); }
 
-  .msg-content { flex: 1; }
-
-  .msg-meta {
-    font-size: 0.65rem;
-    color: var(--green-dim);
-    margin-bottom: 5px;
-    letter-spacing: 1px;
-  }
-
-  .msg-body {
-    font-size: 0.85rem;
-    line-height: 1.7;
-    color: var(--text);
-  }
-
+  .msg-content { flex: 1; min-width: 0; }
+  .msg-meta { font-size: 0.62rem; color: var(--green-dim); margin-bottom: 4px; letter-spacing: 1px; }
+  .msg-body { font-size: 0.82rem; line-height: 1.7; color: var(--text); }
   .user-msg .msg-body { color: #e0ffe4; }
 
-  /* Markdown rendering */
   .msg-body h1,.msg-body h2,.msg-body h3 {
-    font-family: 'Orbitron', monospace;
-    color: var(--green);
-    margin: 10px 0 6px;
-    font-size: 0.9rem;
-    letter-spacing: 1px;
+    font-family: 'Orbitron', monospace; color: var(--green);
+    margin: 8px 0 5px; font-size: 0.85rem; letter-spacing: 1px;
   }
-
   .msg-body code {
-    background: var(--bg3);
-    color: var(--green);
-    padding: 1px 5px;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
+    background: var(--bg3); color: var(--green); padding: 1px 5px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.78rem;
     border: 1px solid var(--border);
   }
-
   .msg-body pre {
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    padding: 12px;
-    margin: 8px 0;
-    overflow-x: auto;
-    position: relative;
+    background: var(--bg3); border: 1px solid var(--border);
+    padding: 10px; margin: 6px 0; overflow-x: auto; position: relative;
   }
-
-  .msg-body pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    color: var(--green);
-    font-size: 0.82rem;
-  }
-
+  .msg-body pre code { background: none; border: none; padding: 0; color: var(--green); font-size: 0.76rem; }
   .copy-btn {
-    position: absolute;
-    top: 6px; right: 6px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--green-dim);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    padding: 2px 8px;
-    cursor: pointer;
-    transition: all 0.2s;
+    position: absolute; top: 5px; right: 5px;
+    background: var(--bg); border: 1px solid var(--border);
+    color: var(--green-dim); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem; padding: 2px 7px; cursor: pointer; transition: all 0.2s;
   }
-
   .copy-btn:hover { color: var(--green); border-color: var(--green); }
-
-  .msg-body ul, .msg-body ol {
-    padding-left: 20px;
-    margin: 6px 0;
-  }
-
-  .msg-body li { margin-bottom: 3px; }
-
+  .msg-body ul,.msg-body ol { padding-left: 18px; margin: 5px 0; }
+  .msg-body li { margin-bottom: 2px; }
   .msg-body strong { color: var(--green); }
-
   .msg-body a { color: var(--green-dim); text-decoration: underline; }
 
-  /* Tool output block */
-  .tool-output {
-    background: #000;
-    border: 1px solid rgba(0,255,65,0.1);
-    padding: 10px;
-    font-size: 0.75rem;
-    color: #888;
-    white-space: pre-wrap;
-    word-break: break-all;
-    max-height: 200px;
-    overflow-y: auto;
-    margin: 6px 0;
-  }
-
-  .tool-label {
-    font-size: 0.65rem;
-    color: var(--yellow);
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-  }
-
-  /* Typing indicator */
-  .typing {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    padding: 4px 0;
-  }
-
-  .typing span {
-    width: 6px; height: 6px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: blink 1.2s infinite;
-  }
-
+  .typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .typing span { width: 6px; height: 6px; background: var(--green); border-radius: 50%; animation: blink 1.2s infinite; }
   .typing span:nth-child(2) { animation-delay: 0.2s; }
   .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,100% { opacity: 0.2; } 50% { opacity: 1; } }
 
-  @keyframes blink {
-    0%,100% { opacity: 0.2; }
-    50% { opacity: 1; }
+  .chat-input-area {
+    padding: 10px 14px; border-top: 1px solid var(--border);
+    background: var(--bg2); display: flex; gap: 8px; flex-shrink: 0;
   }
-
-  /* Input area */
-  .input-area {
-    padding: 12px 20px;
-    border-top: 1px solid var(--border);
-    background: var(--bg2);
-    flex-shrink: 0;
-  }
-
-  .run-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .run-input {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid rgba(0,255,65,0.15);
-    color: var(--yellow);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.8rem;
-    padding: 6px 10px;
-    outline: none;
-    transition: border 0.2s;
-  }
-
-  .run-input::placeholder { color: rgba(255,204,0,0.3); }
-  .run-input:focus { border-color: rgba(255,204,0,0.4); }
-
-  .run-label {
-    font-size: 0.7rem;
-    color: var(--yellow);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-    letter-spacing: 1px;
-  }
-
-  .chat-bar {
-    display: flex;
-    gap: 8px;
-  }
-
   #userInput {
-    flex: 1;
-    background: var(--bg3);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.85rem;
-    padding: 10px 14px;
-    outline: none;
-    resize: none;
-    height: 44px;
-    transition: border 0.2s;
+    flex: 1; background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem; padding: 8px 12px; outline: none; resize: none;
+    height: 40px; transition: border 0.2s;
   }
-
-  #userInput:focus { border-color: var(--green); box-shadow: 0 0 12px var(--green-glow); }
-  #userInput::placeholder { color: rgba(0,255,65,0.25); }
+  #userInput:focus { border-color: var(--green); box-shadow: 0 0 10px var(--green-glow); }
+  #userInput::placeholder { color: rgba(0,255,65,0.22); }
 
   .send-btn {
-    background: var(--green-dark);
-    border: 1px solid var(--green);
-    color: var(--green);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.7rem;
-    padding: 0 20px;
-    cursor: pointer;
-    letter-spacing: 2px;
-    transition: all 0.2s;
+    background: var(--green-dark); border: 1px solid var(--green);
+    color: var(--green); font-family: 'Orbitron', monospace;
+    font-size: 0.65rem; padding: 0 16px; cursor: pointer;
+    letter-spacing: 2px; transition: all 0.2s; flex-shrink: 0;
   }
-
-  .send-btn:hover {
-    background: var(--green);
-    color: var(--bg);
-    box-shadow: 0 0 20px rgba(0,255,65,0.4);
-  }
-
+  .send-btn:hover { background: var(--green); color: var(--bg); box-shadow: 0 0 16px rgba(0,255,65,0.4); }
   .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-  /* Welcome */
-  .welcome {
-    text-align: center;
-    padding: 40px 20px;
-    color: rgba(0,255,65,0.3);
-  }
+  .welcome { text-align: center; padding: 30px 16px; color: rgba(0,255,65,0.3); }
+  .welcome-ascii { font-size: 0.6rem; line-height: 1.3; color: rgba(0,255,65,0.15); margin-bottom: 16px; white-space: pre; }
+  .welcome h2 { font-family: 'Orbitron', monospace; font-size: 0.85rem; color: rgba(0,255,65,0.45); letter-spacing: 3px; margin-bottom: 8px; }
+  .welcome p { font-size: 0.75rem; line-height: 1.8; }
 
-  .welcome-ascii {
-    font-size: 0.65rem;
-    line-height: 1.3;
-    color: rgba(0,255,65,0.2);
-    margin-bottom: 20px;
-    white-space: pre;
-  }
-
-  .welcome h2 {
-    font-family: 'Orbitron', monospace;
-    font-size: 1rem;
-    color: rgba(0,255,65,0.5);
-    letter-spacing: 3px;
-    margin-bottom: 10px;
-  }
-
-  .welcome p { font-size: 0.8rem; line-height: 1.8; }
+  .term-welcome { color: rgba(0,255,65,0.25); font-size: 0.7rem; line-height: 1.8; padding: 8px 0; }
 </style>
 </head>
 <body>
 
 <header>
   <div class="logo">CAL<span>CIUM</span></div>
-  <div class="status">
-    <div class="dot"></div>
-    <span>SYSTEM ONLINE</span>
-  </div>
+  <div class="status"><div class="dot"></div><span>SYSTEM ONLINE</span></div>
   <div class="header-actions">
     <select id="modelSelect">
       <option value="openrouter/free">Auto (Best Available Free) ★ Default</option>
@@ -497,307 +436,463 @@
 </header>
 
 <div class="main">
+
+  <!-- Sidebar: Kali Tools Reference -->
   <div class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-title">⚡ Quick Prompts</div>
-      <button class="quick-btn" onclick="quickPrompt('Full recon on target IP 10.10.10.1 — where do I start?')">Full recon methodology</button>
-      <button class="quick-btn" onclick="quickPrompt('Generate nmap command for stealth full port scan with service detection')">Nmap stealth scan</button>
-      <button class="quick-btn" onclick="quickPrompt('How to enumerate SMB shares and find vulnerabilities?')">SMB enumeration</button>
-      <button class="quick-btn" onclick="quickPrompt('Web app found on port 80. What tests should I run first?')">Web app testing</button>
-      <button class="quick-btn" onclick="quickPrompt('Explain how to use Metasploit to exploit MS17-010 EternalBlue')">EternalBlue exploit</button>
-      <button class="quick-btn" onclick="quickPrompt('How to crack a hash found in /etc/shadow?')">Hash cracking</button>
-      <button class="quick-btn" onclick="quickPrompt('Post-exploitation: how to maintain persistence on Linux?')">Linux persistence</button>
-      <button class="quick-btn" onclick="quickPrompt('How to perform SQL injection manually on a login form?')">SQLi manual</button>
+    <div class="sidebar-header">
+      <div class="sidebar-title">⚡ Kali Tools Reference</div>
+      <input class="tools-search-input" type="text" id="toolSearch" placeholder="Search tools..." oninput="renderTools()" autocomplete="off" />
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">🔧 Tool References</div>
-      <button class="quick-btn" onclick="quickPrompt('Give me a cheatsheet of essential nmap commands')">nmap cheatsheet</button>
-      <button class="quick-btn" onclick="quickPrompt('Give me a gobuster wordlist and command examples')">gobuster guide</button>
-      <button class="quick-btn" onclick="quickPrompt('Hydra command examples for different protocols')">hydra examples</button>
-      <button class="quick-btn" onclick="quickPrompt('Common SQLMap flags and usage examples')">sqlmap guide</button>
-    </div>
-    <div class="sidebar-section">
-      <div class="sidebar-title">📋 Workflows</div>
-      <button class="quick-btn" onclick="quickPrompt('Give me a complete CTF methodology checklist from start to finish')">CTF checklist</button>
-      <button class="quick-btn" onclick="quickPrompt('Explain the full bug bounty recon workflow')">Bug bounty recon</button>
-      <button class="quick-btn" onclick="quickPrompt('Internal network pentest methodology')">Internal pentest</button>
-    </div>
+    <div class="cat-filter" id="catFilter"></div>
+    <div class="tools-list" id="toolsList"></div>
   </div>
 
-  <div class="chat-area">
-    <div id="messages">
-      <div class="welcome">
-        <div class="welcome-ascii">
+  <!-- Split columns -->
+  <div class="columns">
+
+    <!-- LEFT: Terminal -->
+    <div class="terminal-col">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        TERMINAL
+      </div>
+      <div id="termOutput">
+        <div class="term-welcome">
+          ┌─────────────────────────────────┐<br>
+          │  CALCIUM TERMINAL  v2.0         │<br>
+          │  Run-only · No AI analysis      │<br>
+          └─────────────────────────────────┘<br>
+          Type a command and press ENTER or [ RUN ]
+        </div>
+      </div>
+      <div class="term-input-area">
+        <span class="term-prompt">$</span>
+        <input type="text" id="cmdInput" placeholder="nmap -sV 192.168.1.1" onkeydown="handleCmdKey(event)" autocomplete="off" spellcheck="false" />
+        <button class="run-btn" id="runBtn" onclick="runCommand()">[ RUN ]</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: AI Chat -->
+    <div class="chat-col">
+      <div class="col-header">
+        <div class="col-dot"></div>
+        AI CHAT
+      </div>
+      <div id="messages">
+        <div class="welcome">
+          <div class="welcome-ascii">
  ██╗  ██╗ █████╗ ██╗     ██╗
  ██║ ██╔╝██╔══██╗██║     ██║
  █████╔╝ ███████║██║     ██║
  ██╔═██╗ ██╔══██║██║     ██║
  ██║  ██╗██║  ██║███████╗██║
  ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝</div>
-        <h2>AI PENTESTING COPILOT</h2>
-        <p>Powered by OpenRouter free models<br>
-        Ask anything about pentesting, paste tool output for analysis,<br>
-        or run tools directly from the terminal bar below.</p>
+          <h2>AI PENTESTING COPILOT</h2>
+          <p>Browse tools on the left · Click any tool to ask AI<br>
+          Terminal in the middle · Chat on the right.</p>
+        </div>
       </div>
-    </div>
-
-    <div class="input-area">
-      <div class="run-bar">
-        <span class="run-label">$ EXEC:</span>
-        <input type="text" class="run-input" id="cmdInput" placeholder="nmap -sV -p 80,443 192.168.1.1" />
-        <button class="btn" onclick="runCommand()">[ RUN + ANALYZE ]</button>
-      </div>
-      <div class="chat-bar">
+      <div class="chat-input-area">
         <textarea id="userInput" placeholder="Ask Calcium anything... or paste tool output for analysis" onkeydown="handleKey(event)"></textarea>
         <button class="send-btn" id="sendBtn" onclick="sendMessage()">SEND</button>
       </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- /columns -->
+</div><!-- /main -->
 
 <script>
-  const sessionId = 'session_' + Date.now();
-  let isLoading = false;
+// ═══════════════════════════════════
+// KALI TOOLS DATABASE
+// ═══════════════════════════════════
+const KALI_TOOLS = [
+  {n:'nmap',        c:'Recon',    p:'Network mapper — port scanning, OS detection, service versions'},
+  {n:'masscan',     c:'Recon',    p:'Fastest mass port scanner — millions of packets/sec'},
+  {n:'rustscan',    c:'Recon',    p:'Ultra-fast Rust port scanner, auto-pipes to nmap'},
+  {n:'netdiscover', c:'Recon',    p:'ARP scanner for live host discovery on LAN'},
+  {n:'arp-scan',    c:'Recon',    p:'ARP host discovery on local network segments'},
+  {n:'dnsenum',     c:'Recon',    p:'DNS enumeration — subdomains, zone transfers, MX/NS'},
+  {n:'dnsrecon',    c:'Recon',    p:'DNS recon — brute force, reverse lookup, zone transfer'},
+  {n:'fierce',      c:'Recon',    p:'DNS reconnaissance and non-contiguous IP scanner'},
+  {n:'theHarvester',c:'Recon',    p:'OSINT — emails, subdomains, IPs from public sources'},
+  {n:'recon-ng',    c:'Recon',    p:'Full-featured web recon framework with modules'},
+  {n:'maltego',     c:'Recon',    p:'Visual OSINT and link analysis data mining tool'},
+  {n:'spiderfoot',  c:'Recon',    p:'Automated OSINT — footprinting and threat intel'},
+  {n:'subfinder',   c:'Recon',    p:'Passive subdomain discovery via online sources'},
+  {n:'amass',       c:'Recon',    p:'In-depth subdomain enumeration and network mapping'},
+  {n:'shodan',      c:'Recon',    p:'CLI for internet-connected device search engine'},
+  {n:'whois',       c:'Recon',    p:'Query domain registration and IP ownership info'},
+  {n:'dig',         c:'Recon',    p:'DNS lookup — query any record type in detail'},
+  {n:'dmitry',      c:'Recon',    p:'Info gathering — whois, subdomains, email addresses'},
+  {n:'nikto',       c:'Web',      p:'Web server scanner — misconfigs, dangerous files'},
+  {n:'gobuster',    c:'Web',      p:'Directory, file and DNS subdomain brute forcer'},
+  {n:'dirb',        c:'Web',      p:'Web content scanner using dictionary attacks'},
+  {n:'dirsearch',   c:'Web',      p:'Fast web path scanner with advanced filtering'},
+  {n:'feroxbuster', c:'Web',      p:'Recursive Rust-based content discovery tool'},
+  {n:'ffuf',        c:'Web',      p:'Fast web fuzzer for dirs, parameters, vhosts'},
+  {n:'wfuzz',       c:'Web',      p:'Web fuzzer — brute force params, auth, paths'},
+  {n:'sqlmap',      c:'Web',      p:'Automated SQL injection detection and exploitation'},
+  {n:'burpsuite',   c:'Web',      p:'Integrated web app security testing platform'},
+  {n:'zaproxy',     c:'Web',      p:'OWASP ZAP — free web app security scanner/proxy'},
+  {n:'whatweb',     c:'Web',      p:'Web fingerprinting — CMS, frameworks, server info'},
+  {n:'wafw00f',     c:'Web',      p:'Detect and fingerprint Web Application Firewalls'},
+  {n:'wpscan',      c:'Web',      p:'WordPress scanner — plugins, themes, users'},
+  {n:'joomscan',    c:'Web',      p:'Joomla CMS vulnerability scanner'},
+  {n:'nuclei',      c:'Web',      p:'Fast vuln scanner using community templates'},
+  {n:'dalfox',      c:'Web',      p:'Fast XSS scanner and parameter analysis tool'},
+  {n:'arjun',       c:'Web',      p:'HTTP parameter discovery — hidden GET/POST params'},
+  {n:'xsser',       c:'Web',      p:'Automated XSS vulnerability detection'},
+  {n:'httpx',       c:'Web',      p:'Fast HTTP probing — status codes, titles, tech'},
+  {n:'msfconsole',  c:'Exploit',  p:'Metasploit Framework — exploits, payloads, post-exploitation'},
+  {n:'msfvenom',    c:'Exploit',  p:'Payload generator — shellcode for all platforms'},
+  {n:'searchsploit',c:'Exploit',  p:'Offline Exploit-DB search for known CVEs'},
+  {n:'beef-xss',    c:'Exploit',  p:'Browser Exploitation Framework via XSS hooks'},
+  {n:'setoolkit',   c:'Exploit',  p:'Social Engineering Toolkit — phishing, harvesting'},
+  {n:'evil-winrm',  c:'Exploit',  p:'WinRM shell for pentesting Windows over port 5985'},
+  {n:'impacket-psexec',  c:'Exploit', p:'Remote code execution via SMB/PsExec technique'},
+  {n:'impacket-smbexec', c:'Exploit', p:'SMB shell via service creation — stealthy exec'},
+  {n:'impacket-wmiexec', c:'Exploit', p:'Semi-interactive shell via WMI'},
+  {n:'pwncat',      c:'Exploit',  p:'Advanced reverse shell handler with post-exploitation'},
+  {n:'hydra',       c:'Password', p:'Fast network login cracker — SSH, FTP, HTTP, RDP'},
+  {n:'medusa',      c:'Password', p:'Parallel brute force for network auth services'},
+  {n:'ncrack',      c:'Password', p:'High-speed auth cracking tool by the Nmap team'},
+  {n:'hashcat',     c:'Password', p:'World\'s fastest CPU/GPU hash cracker'},
+  {n:'john',        c:'Password', p:'John the Ripper — versatile offline password cracker'},
+  {n:'crunch',      c:'Password', p:'Custom wordlist generator from charset/patterns'},
+  {n:'cewl',        c:'Password', p:'Wordlist generator from website content crawling'},
+  {n:'cupp',        c:'Password', p:'Targeted wordlist from user profile information'},
+  {n:'fcrackzip',   c:'Password', p:'Brute force ZIP file password cracker'},
+  {n:'hashid',      c:'Password', p:'Identify hash types — MD5, SHA, bcrypt, NTLM'},
+  {n:'ophcrack',    c:'Password', p:'Windows password cracker using rainbow tables'},
+  {n:'enum4linux',  c:'Network',  p:'SMB enumeration — users, shares, groups, policies'},
+  {n:'smbclient',   c:'Network',  p:'SMB client — browse and download shares'},
+  {n:'smbmap',      c:'Network',  p:'SMB share enumeration and permission mapping'},
+  {n:'rpcclient',   c:'Network',  p:'Query Windows info via MS-RPC — users, SIDs'},
+  {n:'crackmapexec',c:'Network',  p:'SMB/WinRM lateral movement and credential spraying'},
+  {n:'bloodhound',  c:'Network',  p:'AD attack path visualizer — find privesc routes'},
+  {n:'ldapsearch',  c:'Network',  p:'Query LDAP/AD servers — users, groups, policies'},
+  {n:'kerbrute',    c:'Network',  p:'Kerberos brute force — enumerate valid AD users'},
+  {n:'impacket-getNPUsers',  c:'Network', p:'AS-REP Roasting — hashes without pre-auth'},
+  {n:'impacket-getUserSPNs', c:'Network', p:'Kerberoasting — get crackable service tickets'},
+  {n:'impacket-secretsdump', c:'Network', p:'Dump SAM, NTDS.dit, LSA secrets remotely'},
+  {n:'responder',   c:'Network',  p:'LLMNR/NBT-NS poisoner — capture NTLMv2 hashes'},
+  {n:'mitm6',       c:'Network',  p:'IPv6 MITM attack targeting Windows AD environments'},
+  {n:'ettercap',    c:'Network',  p:'MITM attacks — ARP poisoning, sniffing, filtering'},
+  {n:'bettercap',   c:'Network',  p:'Network attacks — ARP, WiFi, HTTPS stripping'},
+  {n:'netcat',      c:'Network',  p:'TCP/UDP Swiss knife — listeners, shells, transfers'},
+  {n:'socat',       c:'Network',  p:'Multipurpose relay — port forwarding, shells'},
+  {n:'proxychains', c:'Network',  p:'Route TCP through proxies — pivoting and anonymity'},
+  {n:'chisel',      c:'Network',  p:'Fast TCP/UDP tunnel over HTTP — firewall bypass'},
+  {n:'ligolo-ng',   c:'Network',  p:'Advanced pivoting via TUN interface'},
+  {n:'tcpdump',     c:'Network',  p:'CLI packet capture for raw traffic analysis'},
+  {n:'wireshark',   c:'Network',  p:'GUI packet analyzer — deep protocol inspection'},
+  {n:'tshark',      c:'Network',  p:'Terminal Wireshark — scripted packet analysis'},
+  {n:'arpspoof',    c:'Network',  p:'ARP spoofing to redirect traffic through attacker'},
+  {n:'aircrack-ng', c:'Wireless', p:'WEP/WPA/WPA2 cracking from captured handshakes'},
+  {n:'airmon-ng',   c:'Wireless', p:'Enable/disable monitor mode on wireless interfaces'},
+  {n:'airodump-ng', c:'Wireless', p:'Capture 802.11 frames — WPA handshake collection'},
+  {n:'aireplay-ng', c:'Wireless', p:'Packet injection — deauth, ARP replay, fake auth'},
+  {n:'wifite',      c:'Wireless', p:'Automated wireless attack tool — WEP, WPA, WPS'},
+  {n:'reaver',      c:'Wireless', p:'WPS PIN brute force to recover WPA passphrase'},
+  {n:'bully',       c:'Wireless', p:'WPS brute force attack — alternative to Reaver'},
+  {n:'pixiewps',    c:'Wireless', p:'Offline WPS PIN cracking via Pixie Dust attack'},
+  {n:'hcxdumptool', c:'Wireless', p:'Capture PMKID and EAPOL for offline cracking'},
+  {n:'hcxtools',    c:'Wireless', p:'Convert captures to hashcat-compatible formats'},
+  {n:'kismet',      c:'Wireless', p:'Wireless network detector, sniffer and IDS'},
+  {n:'mimikatz',    c:'Post',     p:'Windows cred dumping — passwords, hashes, tickets'},
+  {n:'empire',      c:'Post',     p:'PowerShell/Python post-exploitation C2 framework'},
+  {n:'linpeas',     c:'Post',     p:'Linux PrivEsc auto-enumeration script'},
+  {n:'winpeas',     c:'Post',     p:'Windows PrivEsc enumeration — misconfigs, weak perms'},
+  {n:'pspy',        c:'Post',     p:'Monitor Linux processes without root — find crons'},
+  {n:'lsassy',      c:'Post',     p:'Remotely dump lsass and extract credentials'},
+  {n:'linenum',     c:'Post',     p:'Linux enumeration script for privilege escalation'},
+  {n:'binwalk',     c:'Forensics',p:'Firmware analysis and embedded file extraction'},
+  {n:'foremost',    c:'Forensics',p:'File carving — recover deleted files from images'},
+  {n:'volatility3', c:'Forensics',p:'Memory forensics — analyze RAM dumps for artifacts'},
+  {n:'autopsy',     c:'Forensics',p:'Digital forensics GUI — disk imaging, investigation'},
+  {n:'exiftool',    c:'Forensics',p:'Read/write metadata in images, PDFs, media files'},
+  {n:'steghide',    c:'Forensics',p:'Embed/extract hidden data in JPEG/BMP/WAV'},
+  {n:'stegseek',    c:'Forensics',p:'Fast steghide brute forcer using wordlists'},
+  {n:'zsteg',       c:'Forensics',p:'Detect LSB steganography in PNG/BMP images'},
+  {n:'ghidra',      c:'Forensics',p:'NSA RE suite — decompiler and disassembler'},
+  {n:'radare2',     c:'Forensics',p:'RE framework — disassembly, debugging, analysis'},
+  {n:'gdb',         c:'Forensics',p:'GNU Debugger — dynamic analysis, exploit dev'},
+  {n:'strings',     c:'Forensics',p:'Extract printable strings from binary files'},
+  {n:'strace',      c:'Forensics',p:'Trace system calls of a running process'},
+  {n:'tor',         c:'Misc',     p:'Anonymity network — route traffic through Tor'},
+  {n:'openvpn',     c:'Misc',     p:'VPN client — connect to HTB/THM/lab environments'},
+  {n:'openssl',     c:'Misc',     p:'Crypto toolkit — certs, encrypt, decrypt, s_client'},
+  {n:'ssh',         c:'Misc',     p:'Secure shell — remote access, tunnels, port forwarding'},
+  {n:'python3',     c:'Misc',     p:'Run exploits, HTTP servers, custom scripts'},
+  {n:'tmux',        c:'Misc',     p:'Terminal multiplexer — split panes, persist sessions'},
+  {n:'base64',      c:'Misc',     p:'Encode/decode base64 — payload obfuscation'},
+  {n:'nc',          c:'Misc',     p:'Netcat — listeners, reverse shells, banner grabbing'},
+  {n:'rlwrap',      c:'Misc',     p:'Add readline history to raw netcat shells'},
+];
 
-  function getModel() {
-    return document.getElementById('modelSelect').value;
+const CATS = ['All','Recon','Web','Exploit','Password','Network','Wireless','Post','Forensics','Misc'];
+let activeCat = 'All';
+
+function initTools() {
+  const cf = document.getElementById('catFilter');
+  CATS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (c === 'All' ? ' active' : '');
+    b.textContent = c;
+    b.onclick = () => {
+      document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      activeCat = c;
+      renderTools();
+    };
+    cf.appendChild(b);
+  });
+  renderTools();
+}
+
+function renderTools() {
+  const q = (document.getElementById('toolSearch').value || '').toLowerCase();
+  const list = document.getElementById('toolsList');
+  list.innerHTML = '';
+
+  const filtered = KALI_TOOLS.filter(t =>
+    (activeCat === 'All' || t.c === activeCat) &&
+    (!q || t.n.includes(q) || t.p.toLowerCase().includes(q))
+  );
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="no-results">No tools found.</div>';
+    return;
   }
 
-  function timestamp() {
-    return new Date().toLocaleTimeString('en-US', {hour12: false});
-  }
+  const grouped = {};
+  filtered.forEach(t => { (grouped[t.c] = grouped[t.c] || []).push(t); });
 
-  function addMessage(role, content, extra = null) {
-    const msgs = document.getElementById('messages');
-
-    // Remove welcome if present
-    const welcome = msgs.querySelector('.welcome');
-    if (welcome) welcome.remove();
-
-    const div = document.createElement('div');
-    div.className = `message ${role === 'user' ? 'user-msg' : 'ai-msg'}`;
-
-    const icon = role === 'user' ? '▶' : '⬡';
-    const label = role === 'user' ? 'OPERATOR' : 'CALCIUM';
-    const model = role === 'ai' ? `<span style="color:rgba(0,255,65,0.3)"> | ${getModel().split('/')[1]?.split(':')[0] || 'AI'}</span>` : '';
-
-    let bodyHTML = '';
-
-    if (extra) {
-      bodyHTML += `<div class="tool-label">▶ EXECUTED: ${extra.command}</div>`;
-      bodyHTML += `<div class="tool-output">${escapeHtml(extra.output)}</div>`;
-      bodyHTML += `<div class="tool-label" style="color:var(--green);margin-top:8px">⬡ AI ANALYSIS:</div>`;
+  Object.entries(grouped).forEach(([cat, tools]) => {
+    if (activeCat === 'All') {
+      const hdr = document.createElement('div');
+      hdr.className = 'tool-cat-header';
+      hdr.textContent = `── ${cat.toUpperCase()} ──`;
+      list.appendChild(hdr);
     }
+    tools.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'tool-item';
+      item.innerHTML = `<div class="tool-name">${t.n}</div><div class="tool-purpose">${t.p}</div>`;
+      item.onclick = () => quickPrompt(`Explain ${t.n} in detail: what it does, key flags, practical pentesting examples and what to look for in the output.`);
+      list.appendChild(item);
+    });
+  });
+}
 
-    if (role === 'user') {
-      bodyHTML += escapeHtml(content).replace(/\n/g, '<br>');
+// ═══════════════════════════════════
+// TERMINAL
+// ═══════════════════════════════════
+let cmdHistory = [];
+let historyIndex = -1;
+
+function handleCmdKey(e) {
+  if (e.key === 'Enter') { runCommand(); return; }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (historyIndex < cmdHistory.length - 1) {
+      historyIndex++;
+      document.getElementById('cmdInput').value = cmdHistory[cmdHistory.length - 1 - historyIndex];
+    }
+  }
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (historyIndex > 0) {
+      historyIndex--;
+      document.getElementById('cmdInput').value = cmdHistory[cmdHistory.length - 1 - historyIndex];
     } else {
-      bodyHTML += renderMarkdown(content);
-    }
-
-    div.innerHTML = `
-      <div class="msg-icon">${icon}</div>
-      <div class="msg-content">
-        <div class="msg-meta">[${timestamp()}] ${label}${model}</div>
-        <div class="msg-body">${bodyHTML}</div>
-      </div>
-    `;
-
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-
-    // Syntax highlight
-    div.querySelectorAll('pre code').forEach(el => {
-      hljs.highlightElement(el);
-      // Add copy button
-      const pre = el.parentElement;
-      pre.style.position = 'relative';
-      const btn = document.createElement('button');
-      btn.className = 'copy-btn';
-      btn.textContent = 'COPY';
-      btn.onclick = () => {
-        navigator.clipboard.writeText(el.textContent);
-        btn.textContent = 'COPIED!';
-        setTimeout(() => btn.textContent = 'COPY', 1500);
-      };
-      pre.appendChild(btn);
-    });
-
-    return div;
-  }
-
-  function addTyping() {
-    const msgs = document.getElementById('messages');
-    const div = document.createElement('div');
-    div.className = 'message ai-msg';
-    div.id = 'typing-indicator';
-    div.innerHTML = `
-      <div class="msg-icon">⬡</div>
-      <div class="msg-content">
-        <div class="msg-meta">[${timestamp()}] CALCIUM</div>
-        <div class="msg-body"><div class="typing"><span></span><span></span><span></span></div></div>
-      </div>
-    `;
-    msgs.appendChild(div);
-    msgs.scrollTop = msgs.scrollHeight;
-  }
-
-  function removeTyping() {
-    document.getElementById('typing-indicator')?.remove();
-  }
-
-  function renderMarkdown(text) {
-    try {
-      return marked.parse(text);
-    } catch {
-      return escapeHtml(text).replace(/\n/g, '<br>');
+      historyIndex = -1;
+      document.getElementById('cmdInput').value = '';
     }
   }
+}
 
-  function escapeHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+async function runCommand() {
+  const input = document.getElementById('cmdInput');
+  const command = input.value.trim();
+  if (!command) return;
 
-  async function sendMessage(content = null) {
-    if (isLoading) return;
-    const input = document.getElementById('userInput');
-    const message = content || input.value.trim();
-    if (!message) return;
+  cmdHistory.push(command);
+  historyIndex = -1;
+  input.value = '';
 
-    input.value = '';
-    addMessage('user', message);
-    isLoading = true;
-    document.getElementById('sendBtn').disabled = true;
-    addTyping();
+  const out = document.getElementById('termOutput');
+  const welcome = out.querySelector('.term-welcome');
+  if (welcome) welcome.remove();
 
-    try {
-      const resp = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ message, session_id: sessionId, model: getModel() })
-      });
-      const data = await resp.json();
-      removeTyping();
-      if (data.error) {
-        addMessage('ai', `⚠️ **Error:** ${data.error}`);
-      } else {
-        addMessage('ai', data.reply);
-      }
-    } catch (e) {
-      removeTyping();
-      addMessage('ai', `⚠️ **Connection error:** ${e.message}\n\nMake sure the server is running: \`python3 server.py\``);
-    }
+  const entry = document.createElement('div');
+  entry.className = 'term-entry';
+  entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}</div><div class="term-info">running...</div>`;
+  out.appendChild(entry);
+  out.scrollTop = out.scrollHeight;
 
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-  }
+  document.getElementById('runBtn').disabled = true;
 
-  async function runCommand() {
-    if (isLoading) return;
-    const input = document.getElementById('cmdInput');
-    const command = input.value.trim();
-    if (!command) return;
-    input.value = '';
-
-    isLoading = true;
-    document.getElementById('sendBtn').disabled = true;
-
-    const msgs = document.getElementById('messages');
-    const welcome = msgs.querySelector('.welcome');
-    if (welcome) welcome.remove();
-
-    // Show running indicator
-    const runDiv = document.createElement('div');
-    runDiv.className = 'message user-msg';
-    runDiv.innerHTML = `
-      <div class="msg-icon">$</div>
-      <div class="msg-content">
-        <div class="msg-meta">[${timestamp()}] EXECUTING COMMAND</div>
-        <div class="msg-body"><span style="color:var(--yellow)">${escapeHtml(command)}</span> <span style="color:rgba(0,255,65,0.4)">... running</span></div>
-      </div>
-    `;
-    msgs.appendChild(runDiv);
-    msgs.scrollTop = msgs.scrollHeight;
-
-    try {
-      const runResp = await fetch('/api/run', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ command })
-      });
-      const runData = await runResp.json();
-
-      if (runData.error) {
-        runDiv.querySelector('.msg-body').innerHTML = `<span style="color:var(--red)">⚠ ${escapeHtml(runData.error)}</span>`;
-        isLoading = false;
-        document.getElementById('sendBtn').disabled = false;
-        return;
-      }
-
-      runDiv.querySelector('.msg-body').innerHTML = `
-        <span style="color:var(--yellow)">$ ${escapeHtml(command)}</span>
-        <div class="tool-output" style="margin-top:8px">${escapeHtml(runData.output)}</div>
-      `;
-
-      // Now analyze with AI
-      addTyping();
-      const analyzeMsg = `I ran: \`${command}\`\n\nOutput:\n\`\`\`\n${runData.output}\n\`\`\`\n\nAnalyze this output and tell me what you found and what to do next.`;
-
-      const chatResp = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ message: analyzeMsg, session_id: sessionId, model: getModel() })
-      });
-      const chatData = await chatResp.json();
-      removeTyping();
-      addMessage('ai', chatData.reply || chatData.error);
-
-    } catch (e) {
-      removeTyping();
-      addMessage('ai', `⚠️ **Error:** ${e.message}`);
-    }
-
-    isLoading = false;
-    document.getElementById('sendBtn').disabled = false;
-  }
-
-  function quickPrompt(text) {
-    document.getElementById('userInput').value = text;
-    sendMessage();
-  }
-
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
-
-  async function clearSession() {
-    await fetch('/api/clear', {
+  try {
+    const resp = await fetch('/api/run', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ session_id: sessionId })
-    });
-    document.getElementById('messages').innerHTML = `
-      <div class="welcome">
-        <h2>SESSION CLEARED</h2>
-        <p>Conversation history has been wiped.<br>Start a new session.</p>
-      </div>
-    `;
-  }
-
-  async function exportSession() {
-    const resp = await fetch('/api/export', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ session_id: sessionId })
+      body: JSON.stringify({ command })
     });
     const data = await resp.json();
-    if (data.file) {
-      addMessage('ai', `✅ Session exported to: \`${data.file}\``);
+
+    if (data.error) {
+      entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}</div><div class="term-out term-err">⚠ ${escapeHtml(data.error)}</div>`;
+    } else {
+      const rc = data.returncode !== undefined ? ` <span style="color:rgba(255,204,0,0.3);font-size:0.65rem">[exit ${data.returncode}]</span>` : '';
+      entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}${rc}</div><div class="term-out">${escapeHtml(data.output)}</div>`;
     }
+  } catch (e) {
+    entry.innerHTML = `<div class="term-cmd">${escapeHtml(command)}</div><div class="term-out term-err">⚠ Connection error: ${escapeHtml(e.message)}</div>`;
   }
+
+  document.getElementById('runBtn').disabled = false;
+  out.scrollTop = out.scrollHeight;
+  input.focus();
+}
+
+// ═══════════════════════════════════
+// CHAT
+// ═══════════════════════════════════
+const sessionId = 'session_' + Date.now();
+let isLoading = false;
+
+function getModel() { return document.getElementById('modelSelect').value; }
+function timestamp() { return new Date().toLocaleTimeString('en-US', {hour12: false}); }
+
+function addMessage(role, content) {
+  const msgs = document.getElementById('messages');
+  const welcome = msgs.querySelector('.welcome');
+  if (welcome) welcome.remove();
+
+  const div = document.createElement('div');
+  div.className = `message ${role === 'user' ? 'user-msg' : 'ai-msg'}`;
+
+  const icon = role === 'user' ? '▶' : '⬡';
+  const label = role === 'user' ? 'OPERATOR' : 'CALCIUM';
+  const model = role === 'ai'
+    ? `<span style="color:rgba(0,255,65,0.3)"> | ${getModel().split('/')[1]?.split(':')[0] || 'AI'}</span>` : '';
+
+  const bodyHTML = role === 'user'
+    ? escapeHtml(content).replace(/\n/g, '<br>')
+    : renderMarkdown(content);
+
+  div.innerHTML = `
+    <div class="msg-icon">${icon}</div>
+    <div class="msg-content">
+      <div class="msg-meta">[${timestamp()}] ${label}${model}</div>
+      <div class="msg-body">${bodyHTML}</div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  div.querySelectorAll('pre code').forEach(el => {
+    hljs.highlightElement(el);
+    const pre = el.parentElement;
+    pre.style.position = 'relative';
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.textContent = 'COPY';
+    btn.onclick = () => {
+      navigator.clipboard.writeText(el.textContent);
+      btn.textContent = 'COPIED!';
+      setTimeout(() => btn.textContent = 'COPY', 1500);
+    };
+    pre.appendChild(btn);
+  });
+}
+
+function addTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'message ai-msg';
+  div.id = 'typing-indicator';
+  div.innerHTML = `
+    <div class="msg-icon">⬡</div>
+    <div class="msg-content">
+      <div class="msg-meta">[${timestamp()}] CALCIUM</div>
+      <div class="msg-body"><div class="typing"><span></span><span></span><span></span></div></div>
+    </div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() { document.getElementById('typing-indicator')?.remove(); }
+
+function renderMarkdown(text) {
+  try { return marked.parse(text); }
+  catch { return escapeHtml(text).replace(/\n/g, '<br>'); }
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function sendMessage(content = null) {
+  if (isLoading) return;
+  const input = document.getElementById('userInput');
+  const message = content || input.value.trim();
+  if (!message) return;
+
+  input.value = '';
+  addMessage('user', message);
+  isLoading = true;
+  document.getElementById('sendBtn').disabled = true;
+  addTyping();
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ message, session_id: sessionId, model: getModel() })
+    });
+    const data = await resp.json();
+    removeTyping();
+    addMessage('ai', data.error ? `⚠️ **Error:** ${data.error}` : data.reply);
+  } catch (e) {
+    removeTyping();
+    addMessage('ai', `⚠️ **Connection error:** ${e.message}`);
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function quickPrompt(text) {
+  document.getElementById('userInput').value = text;
+  sendMessage();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+async function clearSession() {
+  await fetch('/api/clear', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ session_id: sessionId })
+  });
+  document.getElementById('messages').innerHTML = `<div class="welcome"><h2>SESSION CLEARED</h2><p>Start a new session.</p></div>`;
+  document.getElementById('termOutput').innerHTML = `<div class="term-info">Terminal cleared.</div>`;
+}
+
+async function exportSession() {
+  const resp = await fetch('/api/export', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ session_id: sessionId })
+  });
+  const data = await resp.json();
+  if (data.file) addMessage('ai', `✅ Session exported to: \`${data.file}\``);
+}
+
+initTools();
 </script>
 </body>
 </html>
