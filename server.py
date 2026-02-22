@@ -178,23 +178,46 @@ def chat():
         "max_tokens": 2048,
     }
 
-    headers = {
+    payload["stream"] = True
+    api_headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
         "HTTP-Referer": "https://calcium.local",
         "X-Title": "Calcium"
     }
 
-    try:
-        resp = requests.post(API_URL, headers=headers, json=payload, timeout=60)
-        resp.raise_for_status()
-        reply = resp.json()["choices"][0]["message"]["content"]
-        sessions[session_id].append({"role": "assistant", "content": reply})
-        return jsonify({"reply": reply, "session_id": session_id})
-    except requests.exceptions.HTTPError as e:
-        return jsonify({"error": f"API error: {e.response.status_code}"}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    def generate():
+        full_reply = ""
+        try:
+            with requests.post(API_URL, headers=api_headers, json=payload, stream=True, timeout=60) as r:
+                r.raise_for_status()
+                for line in r.iter_lines():
+                    if not line:
+                        continue
+                    text = line.decode("utf-8")
+                    if not text.startswith("data: "):
+                        continue
+                    data_str = text[6:].strip()
+                    if data_str == "[DONE]":
+                        break
+                    try:
+                        chunk = json.loads(data_str)
+                        delta = chunk["choices"][0].get("delta", {}).get("content", "")
+                        if delta:
+                            full_reply += delta
+                            yield f"data: {json.dumps({'token': delta})}\n\n"
+                    except Exception:
+                        continue
+            sessions[session_id].append({"role": "assistant", "content": full_reply})
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return app.response_class(
+        generate(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
+    )
 
 @app.route("/api/run", methods=["POST"])
 def run_command():

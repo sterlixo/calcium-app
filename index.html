@@ -1123,6 +1123,7 @@ function addMessage(role, content) {
     };
     pre.appendChild(btn);
   });
+  return div;
 }
 
 function addTyping() {
@@ -1169,22 +1170,59 @@ async function sendMessage(content = null) {
 
   try {
     const resp = await fetch('/api/chat', {
-      method:'POST',
+      method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ message, session_id: sessionId, model: getModel() })
     });
-    const data = await resp.json();
+
+    if (resp.status === 401) {
+      removeTyping();
+      addMessage('ai', '🔒 **Session expired — contact your admin to restore access.**');
+      logActivity('err', 'Session expired');
+      isLoading = false;
+      document.getElementById('sendBtn').disabled = false;
+      return;
+    }
+
     removeTyping();
-    if (data.error) {
-      addMessage('ai', `⚠️ **Error:** ${data.error}`);
-      logActivity('err', 'AI error: ' + data.error);
-    } else {
-      addMessage('ai', data.reply);
-      logActivity('ai', 'AI responded · ' + data.reply.length + ' chars');
+    const msgDiv = addMessage('ai', '');
+    const bodyEl = msgDiv.querySelector('.msg-body');
+    const msgs   = document.getElementById('messages');
+    let fullText = '';
+    let buffer   = '';
+
+    const reader  = resp.body.getReader();
+    const decoder = new TextDecoder();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('
+');
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const raw = line.slice(6).trim();
+        if (!raw || raw === '[DONE]') continue;
+        try {
+          const chunk = JSON.parse(raw);
+          if (chunk.error) {
+            bodyEl.innerHTML = renderMarkdown('⚠️ **Error:** ' + chunk.error);
+            logActivity('err', 'AI error: ' + chunk.error);
+          } else if (chunk.token) {
+            fullText += chunk.token;
+            bodyEl.innerHTML = renderMarkdown(fullText);
+            msgs.scrollTop = msgs.scrollHeight;
+          } else if (chunk.done) {
+            logActivity('ai', 'AI responded · ' + fullText.length + ' chars');
+          }
+        } catch(e) { continue; }
+      }
     }
   } catch(e) {
     removeTyping();
-    addMessage('ai', `⚠️ **Connection error:** ${e.message}`);
+    addMessage('ai', '⚠️ **Connection error:** ' + e.message);
     logActivity('err', 'AI connection error: ' + e.message);
   }
 
