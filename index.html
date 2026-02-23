@@ -423,35 +423,6 @@ header {
 .log-tag.info { background:rgba(255,160,0,0.1);   color:#ffaa00; }
 .log-text { color:rgba(180,220,240,0.55); flex:1; word-break:break-word; font-size:0.75rem; }
 
-/* ── STATS BAR ── */
-#statsBar {
-  display:flex; align-items:center; gap:10px;
-  padding:4px 10px;
-  background:rgba(0,200,255,0.03);
-  border-bottom:1px solid rgba(0,200,255,0.08);
-  font-family:monospace; font-size:0.68rem; flex-shrink:0;
-}
-.stat-item { display:flex; align-items:center; gap:4px; color:rgba(180,220,240,0.4); }
-.stat-item span.val { font-weight:700; font-size:0.72rem; }
-.stat-cmd  .val { color:#44ddff; }
-.stat-err  .val { color:#ff4466; }
-.stat-time .val { color:rgba(180,220,240,0.5); }
-.stat-sep  { color:rgba(0,200,255,0.12); }
-
-/* ── LOG ROW VARIANTS ── */
-.log-tag.cmd  { background:rgba(0,200,255,0.15); color:#44ddff; border-left:2px solid rgba(0,200,255,0.4); }
-.log-tag.ok   { background:rgba(0,255,100,0.12); color:#44ff88; border-left:2px solid rgba(68,255,136,0.4); }
-.log-tag.err  { background:rgba(255,50,80,0.18); color:#ff4466; border-left:2px solid rgba(255,68,102,0.6); font-weight:900; }
-.log-tag.info { background:rgba(255,160,0,0.1);  color:#ffaa00; border-left:2px solid rgba(255,160,0,0.3); }
-.log-row.is-err { background:rgba(255,50,80,0.04); border-left:2px solid rgba(255,68,102,0.2); }
-.log-row.is-cmd { border-left:2px solid rgba(0,200,255,0.08); }
-
-/* ── THREAT DOT ── */
-.threat-dot { display:inline-block; width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-top:3px; }
-.threat-low    { background:#44ff88; box-shadow:0 0 4px rgba(68,255,136,0.5); }
-.threat-medium { background:#ffaa00; box-shadow:0 0 4px rgba(255,170,0,0.5); }
-.threat-high   { background:#ff4466; box-shadow:0 0 4px rgba(255,68,102,0.6); }
-
 /* ── CHAT COLUMN ── */
 .chat-col { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 
@@ -781,13 +752,6 @@ header {
           <div class="pane-hdr-dot" style="background:#ffaa00"></div>
           <div class="pane-hdr-label">Activity Log</div>
         </div>
-        <div id="statsBar">
-          <div class="stat-item stat-cmd">CMD <span class="val" id="statCmd">0</span></div>
-          <div class="stat-sep">·</div>
-          <div class="stat-item stat-err">ERR <span class="val" id="statErr">0</span></div>
-          <div class="stat-sep">·</div>
-          <div class="stat-item stat-time">SESSION <span class="val" id="statTime">0m</span></div>
-        </div>
         <div id="activityLog">
           <div class="log-row">
             <span class="log-ts">--:--:--</span>
@@ -1021,53 +985,14 @@ function renderTools() {
 // ═══════════════════════════════════
 // ACTIVITY LOG
 // ═══════════════════════════════════
-const _stats = { cmd:0, err:0, startTime: Date.now() };
-
-const THREAT_HIGH = new Set(['msfconsole','msfvenom','sqlmap','hydra','medusa','ncrack','hashcat',
-  'john','aircrack-ng','aireplay-ng','ettercap','bettercap','responder','evil-winrm',
-  'impacket-secretsdump','impacket-psexec','impacket-smbexec','impacket-wmiexec',
-  'kerbrute','bloodhound','searchsploit','exploit','wifite','hcxdumptool']);
-const THREAT_MED  = new Set(['nmap','rustscan','masscan','gobuster','dirb','dirsearch',
-  'feroxbuster','ffuf','wfuzz','nikto','wpscan','enum4linux','smbmap','smbclient',
-  'crackmapexec','nxc','subfinder','amass','dnsenum','dnsrecon','nuclei','dalfox',
-  'arjun','tcpdump','tshark','wireshark','netdiscover','arp-scan','proxychains']);
-
-function getThreatLevel(cmd) {
-  const tool = cmd.trim().split(/\s+/)[0];
-  if (THREAT_HIGH.has(tool)) return 'high';
-  if (THREAT_MED.has(tool))  return 'medium';
-  return 'low';
-}
-
-function updateStatsBar() {
-  document.getElementById('statCmd').textContent  = _stats.cmd;
-  document.getElementById('statErr').textContent  = _stats.err;
-  const mins = Math.floor((Date.now() - _stats.startTime) / 60000);
-  document.getElementById('statTime').textContent = mins + 'm';
-}
-setInterval(updateStatsBar, 30000);
-
 function logActivity(type, msg) {
-  if (type === 'ai') return;  // never log AI entries
-  if (type === 'cmd' || type === 'ok') _stats.cmd++;
-  else if (type === 'err')             _stats.err++;
-  updateStatsBar();
-
   const log = document.getElementById('activityLog');
   const now = new Date().toLocaleTimeString('en-US', {hour12:false});
   const row = document.createElement('div');
-  row.className = 'log-row' + (type === 'err' ? ' is-err' : type === 'cmd' ? ' is-cmd' : '');
-
-  let threatDot = '';
-  if (type === 'cmd') {
-    const lvl = getThreatLevel(msg);
-    threatDot = `<span class="threat-dot threat-${lvl}" title="${lvl} risk"></span>`;
-  }
-
+  row.className = 'log-row';
   row.innerHTML = `
     <span class="log-ts">${now}</span>
     <span class="log-tag ${type}">${type}</span>
-    ${threatDot}
     <span class="log-text">${escapeHtml(msg)}</span>
   `;
   log.appendChild(row);
@@ -1288,6 +1213,7 @@ async function sendMessage(content = null) {
             bodyEl.innerHTML = renderMarkdown(fullText);
             msgs.scrollTop = msgs.scrollHeight;
           } else if (chunk.done) {
+            logActivity('ai', 'AI responded · ' + fullText.length + ' chars');
           }
         } catch(e) { continue; }
       }
@@ -1369,6 +1295,7 @@ async function sendMessageSilent(message) {
         } catch(e) {}
       }
     }
+    logActivity('ai', `AI responded · ${fullText.length} chars`);
   } catch(e) {
     removeTyping();
     addMessage('ai', '⚠️ **Connection error:** ' + e.message);
