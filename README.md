@@ -1,74 +1,97 @@
-# ⚡ Calcium — AI Assistant for Kali Linux
+# ⚡ Calcium — AI Pentesting Assistant for Kali Linux
 
-An AI-powered security research assistant for Kali Linux, built as a native desktop app using Electron + Flask + OpenRouter free models.
+An AI-powered security research assistant for Kali Linux, built as a native desktop app using Electron + Flask + free OpenRouter AI models.
+
+---
 
 ## Features
 
 - **AI Chat** — Ask anything about tools, techniques, CVEs, and workflows
-- **Built-in Terminal** — Run security tools directly from the UI with output display
-- **Activity Log** — Live timestamped log of every command run and AI interaction
-- **Kali Tools Reference** — 120+ tools organized by category with one-click AI explanations
+- **Built-in Terminal** — Run Kali tools directly from the UI
+- **120+ Tools Reference** — Organized by category with one-click commands
+- **Multi-user Login** — Admin panel to manage users
 - **Session Export** — Save your full session to JSON
-- **Desktop App** — Runs as a native Electron window, not just a browser tab
+- **Desktop App** — Native Electron window for Kali Linux
 
-## Setup
+---
 
-### 1. Clone the repo
+## Requirements
+
+- Kali Linux (recommended) or any Debian-based Linux
+- Python 3.8+
+- Node.js 16+
+- Free API key from [openrouter.ai](https://openrouter.ai)
+
+---
+
+## Quick Setup
+
+### Step 1 — Clone the repo
 ```bash
-git clone https://github.com/yourusername/calci.git
+git clone https://github.com/sterlixo/calci.git
 cd calci
 ```
 
-### 2. Run setup
+### Step 2 — Run setup script
 ```bash
 chmod +x setup-electron.sh
 ./setup-electron.sh
 ```
 
-This installs Node.js, Electron, Python dependencies, and adds Calcium to your Kali app menu.
+This automatically installs:
+- Node.js and Electron
+- Python dependencies (Flask, requests, bcrypt)
+- Adds Calcium to your Kali app menu
 
-### 3. Get a free API key
-Sign up at https://openrouter.ai — completely free, no credit card needed.
+### Step 3 — Get a free API key
 
-### 4. Set your API key
+1. Go to [openrouter.ai](https://openrouter.ai)
+2. Sign up — completely free, no credit card needed
+3. Go to **Keys** → **Create Key** → copy it
+
+### Step 4 — Create your `.env` file
 ```bash
-echo 'OPENROUTER_API_KEY=sk-or-your-key-here' > .env
+nano .env
 ```
 
-### 5. Launch
+Add these two lines:
+```
+OPENROUTER_API_KEY=sk-or-your-key-here
+MODEL=meta-llama/llama-3.3-70b-instruct:free
+```
+
+Save with `Ctrl+X` → `Y` → `Enter`
+
+### Step 5 — Launch
 ```bash
 npm start
 ```
 
 Or find **Calcium** in your Kali applications menu.
 
----
+### Step 6 — Login
 
-## After a Kali Upgrade
-
-If anything breaks after `sudo apt upgrade`, run:
-```bash
-~/fix-after-upgrade.sh
+Default credentials on first launch:
+```
+Username: admin
+Password: calcium123
 ```
 
-Or manually:
-```bash
-sudo apt install spice-vdagent -y
-cd ~/calci && npm install
-npm start
-```
+> ⚠️ Change the default password after first login via the Admin panel.
 
 ---
 
-## Free AI Models (via OpenRouter)
+## Free AI Models
+
+Change the `MODEL` in your `.env` file to switch models:
 
 | Model | Notes |
 |-------|-------|
-| `meta-llama/llama-3.3-70b-instruct:free` | Default — best quality |
+| `meta-llama/llama-3.3-70b-instruct:free` | Best quality (recommended) |
 | `mistralai/mistral-7b-instruct:free` | Fast and lightweight |
 | `google/gemma-3-27b-it:free` | Good for analysis |
 | `deepseek/deepseek-r1:free` | Strong reasoning |
-| `qwen/qwen-2.5-72b-instruct:free` | Large context |
+| `qwen/qwen-2.5-72b-instruct:free` | Large context window |
 
 ---
 
@@ -76,7 +99,36 @@ npm start
 
 `Recon` · `Web` · `Exploit` · `Password` · `Network` · `Wireless` · `Post` · `Forensics` · `Misc`
 
-120+ tools including nmap, rustscan, gobuster, ffuf, gospider, sqlmap, hydra, hashcat, msfconsole, bloodhound, aircrack-ng, volatility, and more.
+120+ tools including nmap, rustscan, gobuster, ffuf, sqlmap, hydra, hashcat, msfconsole, bloodhound, aircrack-ng, volatility, and more.
+
+---
+
+## Troubleshooting
+
+**App won't start / blank screen:**
+```bash
+cd ~/calci
+python3 server.py
+```
+Check the error output, then restart with `npm start`.
+
+**AI says "No response. Check MODEL in .env":**
+- Make sure your `.env` has a valid model name with `:free` at the end
+- Check your API key is correct at openrouter.ai
+
+**After a Kali upgrade:**
+```bash
+sudo apt install spice-vdagent -y
+cd ~/calci
+npm install
+npm start
+```
+
+**Permission denied on setup:**
+```bash
+chmod +x setup-electron.sh
+./setup-electron.sh
+```
 
 ---
 
@@ -85,14 +137,15 @@ npm start
 ```
 calci/
 ├── index.html          # Frontend UI
-├── server.py           # Flask backend + tool allowlist
+├── server.py           # Flask backend
+├── auth.py             # Multi-user authentication
 ├── main.js             # Electron app wrapper
 ├── package.json        # Node dependencies
 ├── copilot.py          # CLI mode (optional)
 ├── setup.sh            # Python-only setup
 ├── setup-electron.sh   # Full desktop app setup
 ├── calcium.desktop     # Kali app menu shortcut
-├── .env                # API key (not committed)
+├── .env                # Your API key (not committed)
 └── README.md
 ```
 
@@ -100,4 +153,4 @@ calci/
 
 ## Ethical Use
 
-For authorized testing only — CTFs, bug bounties, your own lab, or systems you have explicit written permission to test.
+For authorized testing only — CTFs, bug bounties, your own lab, or systems you have **explicit written permission** to test.
