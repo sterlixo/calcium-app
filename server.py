@@ -49,112 +49,30 @@ MASTER_KEY  = "CALCIUM-STERLIN-2026-XKTZ"
 def is_licensed():
     return LICENSE_KEY == MASTER_KEY
 
-# ── GitHub Gist user allowlist ────────────────────────────────────────────────
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
-GIST_ID      = os.environ.get("GIST_ID", "872e702c27fd69cdbc22bdee030d0054")
-GIST_RAW_URL = f"https://gist.githubusercontent.com/sterlixo/{GIST_ID}/raw/calcium_users.json"
-
-_gist_cache = {"data": None, "ts": 0}
-CACHE_TTL = 60  # seconds
-
-def _fetch_gist() -> dict:
-    import time
-    now = time.time()
-    if _gist_cache["data"] and (now - _gist_cache["ts"]) < CACHE_TTL:
-        return _gist_cache["data"]
-    try:
-        resp = requests.get(GIST_RAW_URL, timeout=5, params={"t": int(now)})
-        data = resp.json()
-        _gist_cache["data"] = data
-        _gist_cache["ts"] = now
-        print(f"[GIST] Refreshed — allowed: {data.get('allowed', [])}, banned: {data.get('banned', [])}")
-        return data
-    except Exception as e:
-        print(f"[GIST] Fetch failed: {e}")
-        return _gist_cache["data"] or {"allowed": [], "banned": []}
-
-def _update_gist(data: dict) -> bool:
-    if not GITHUB_TOKEN:
-        print("[GIST] No GITHUB_TOKEN — cannot update Gist")
-        return False
-    try:
-        resp = requests.patch(
-            f"https://api.github.com/gists/{GIST_ID}",
-            headers={
-                "Authorization": f"token {GITHUB_TOKEN}",
-                "Accept": "application/vnd.github.v3+json"
-            },
-            json={"files": {"calcium_users.json": {"content": json.dumps(data, indent=2)}}},
-            timeout=10
-        )
-        if resp.status_code == 200:
-            _gist_cache["data"] = data
-            _gist_cache["ts"] = 0
-            print(f"[GIST] Updated — allowed: {data.get('allowed', [])}, banned: {data.get('banned', [])}")
-            return True
-        print(f"[GIST] Update failed: {resp.status_code} — {resp.text[:200]}")
-        return False
-    except Exception as e:
-        print(f"[GIST] Update error: {e}")
-        return False
+# ── Supabase user management ──────────────────────────────────────────────────
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
 def is_user_allowed(username: str) -> bool:
+    """Check if username is allowed in Supabase. Falls back to True if Supabase not configured."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return True  # no Supabase configured — allow everyone
     try:
-        data    = _fetch_gist()
-        allowed = data.get("allowed", [])
-        banned  = data.get("banned", [])
-        if username in banned:
-            print(f"[GIST] {username} is BANNED")
-            return False
-        if not allowed:
-            return True  # empty allowed = open to all
-        result = username in allowed
-        if not result:
-            print(f"[GIST] {username} not in allowlist")
-        return result
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/allowed_users",
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json"
+            },
+            params={"username": f"eq.{username}", "allowed": "eq.true"},
+            timeout=5
+        )
+        data = resp.json()
+        return len(data) > 0
     except Exception as e:
-        print(f"[GIST] Check error: {e}")
-        return True  # fail open
-
-def gist_add_user(username: str):
-    """Add username to Gist allowed list."""
-    data    = _fetch_gist()
-    allowed = data.get("allowed", [])
-    banned  = data.get("banned", [])
-    if username not in allowed:
-        allowed.append(username)
-        data["allowed"] = allowed
-    # remove from banned if present
-    if username in banned:
-        banned.remove(username)
-        data["banned"] = banned
-    _update_gist(data)
-
-def gist_remove_user(username: str):
-    """Remove username from Gist allowed list."""
-    data    = _fetch_gist()
-    allowed = data.get("allowed", [])
-    banned  = data.get("banned", [])
-    if username in allowed:
-        allowed.remove(username)
-        data["allowed"] = allowed
-    if username in banned:
-        banned.remove(username)
-        data["banned"] = banned
-    _update_gist(data)
-
-def gist_ban_user(username: str):
-    """Move username to Gist banned list."""
-    data    = _fetch_gist()
-    allowed = data.get("allowed", [])
-    banned  = data.get("banned", [])
-    if username in allowed:
-        allowed.remove(username)
-        data["allowed"] = allowed
-    if username not in banned:
-        banned.append(username)
-        data["banned"] = banned
-    _update_gist(data)
+        print(f"[SUPABASE] Check failed for {username}: {e}")
+        return True  # fail open — don't lock users out if Supabase is down
 
 SYSTEM_PROMPT = """You are Calci, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
 
@@ -398,7 +316,7 @@ def api_login():
     data = request.json
     username = data.get("username","")
 
-    # Check Gist allowlist first
+    # Check Supabase allowlist first
     if not is_user_allowed(username):
         return jsonify({"success": False, "message": "Access denied — contact the administrator"}), 403
 
@@ -434,11 +352,7 @@ def api_create_user():
     if not is_licensed():
         return jsonify({"error": "License required — admin features are locked"}), 403
     data = request.json
-    username = data.get("username","")
-    result = create_user(username, data.get("password",""), data.get("role","user"))
-    if result["success"]:
-        gist_add_user(username)
-        print(f"[GIST] Auto-added '{username}' to allowlist")
+    result = create_user(data.get("username",""), data.get("password",""), data.get("role","user"))
     return jsonify(result), 200 if result["success"] else 400
 
 @app.route("/api/auth/users/delete", methods=["POST"])
@@ -449,13 +363,9 @@ def api_delete_user():
     if not is_licensed():
         return jsonify({"error": "License required — admin features are locked"}), 403
     data = request.json
-    username = data.get("username","")
-    if username == auth["username"]:
+    if data.get("username") == auth["username"]:
         return jsonify({"success": False, "message": "Cannot delete yourself"}), 400
-    result = delete_user(username)
-    if result["success"]:
-        gist_remove_user(username)
-        print(f"[GIST] Auto-removed '{username}' from allowlist")
+    result = delete_user(data.get("username",""))
     return jsonify(result)
 
 @app.route("/api/auth/gist", methods=["GET"])
