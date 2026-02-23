@@ -1,6 +1,6 @@
 # ⚡ Calcium — AI Pentesting Assistant for Kali Linux
 
-An AI-powered security research assistant for Kali Linux, built as a native desktop app using Electron + Flask + free OpenRouter AI models.
+An AI-powered security research assistant for Kali Linux, built as a native desktop app using Electron + Flask.
 
 ---
 
@@ -24,24 +24,21 @@ An AI-powered security research assistant for Kali Linux, built as a native desk
 
 ---
 
-## Quick Setup
+## Installation
 
 ### Step 1 — Clone the repo
 ```bash
-git clone https://github.com/sterlixo/calci.git
-cd calci
+git clone https://github.com/sterlixo/calcium-app.git
+cd calcium-app
 ```
 
-### Step 2 — Run setup script
+### Step 2 — Run setup
 ```bash
-chmod +x setup-electron.sh
-./setup-electron.sh
+chmod +x setup.sh
+./setup.sh
 ```
 
-This automatically installs:
-- Node.js and Electron
-- Python dependencies (Flask, requests, bcrypt)
-- Adds Calcium to your Kali app menu
+This automatically installs all Python and Node dependencies and asks for your API key.
 
 ### Step 3 — Get a free API key
 
@@ -54,10 +51,9 @@ This automatically installs:
 nano .env
 ```
 
-Add these two lines:
+Add:
 ```
 OPENROUTER_API_KEY=sk-or-your-key-here
-MODEL=meta-llama/llama-3.3-70b-instruct:free
 ```
 
 Save with `Ctrl+X` → `Y` → `Enter`
@@ -71,27 +67,7 @@ Or find **Calcium** in your Kali applications menu.
 
 ### Step 6 — Login
 
-Default credentials on first launch:
-```
-Username: admin
-Password: calcium123
-```
-
-> ⚠️ Change the default password after first login via the Admin panel.
-
----
-
-## Free AI Models
-
-Change the `MODEL` in your `.env` file to switch models:
-
-| Model | Notes |
-|-------|-------|
-| `meta-llama/llama-3.3-70b-instruct:free` | Best quality (recommended) |
-| `mistralai/mistral-7b-instruct:free` | Fast and lightweight |
-| `google/gemma-3-27b-it:free` | Good for analysis |
-| `deepseek/deepseek-r1:free` | Strong reasoning |
-| `qwen/qwen-2.5-72b-instruct:free` | Large context window |
+> Contact the administrator to get your login credentials.
 
 ---
 
@@ -107,27 +83,26 @@ Change the `MODEL` in your `.env` file to switch models:
 
 **App won't start / blank screen:**
 ```bash
-cd ~/calci
+cd ~/calcium-app
 python3 server.py
 ```
-Check the error output, then restart with `npm start`.
+Check the terminal output for errors, then restart with `npm start`.
 
-**AI says "No response. Check MODEL in .env":**
-- Make sure your `.env` has a valid model name with `:free` at the end
+**AI says "No response":**
 - Check your API key is correct at openrouter.ai
-
-**After a Kali upgrade:**
-```bash
-sudo apt install spice-vdagent -y
-cd ~/calci
-npm install
-npm start
-```
+- Make sure your `.env` file exists and has `OPENROUTER_API_KEY` set
 
 **Permission denied on setup:**
 ```bash
-chmod +x setup-electron.sh
-./setup-electron.sh
+chmod +x setup.sh
+./setup.sh
+```
+
+**After a Kali upgrade:**
+```bash
+cd ~/calcium-app
+npm install
+npm start
 ```
 
 ---
@@ -135,14 +110,14 @@ chmod +x setup-electron.sh
 ## Project Structure
 
 ```
-calci/
+calcium-app/
 ├── index.html          # Frontend UI
 ├── server.py           # Flask backend
 ├── auth.py             # Multi-user authentication
 ├── main.js             # Electron app wrapper
 ├── package.json        # Node dependencies
 ├── copilot.py          # CLI mode (optional)
-├── setup.sh            # Python-only setup
+├── setup.sh            # Setup script
 ├── setup-electron.sh   # Full desktop app setup
 ├── calcium.desktop     # Kali app menu shortcut
 ├── .env                # Your API key (not committed)

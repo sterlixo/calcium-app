@@ -37,7 +37,9 @@ def require_auth():
     return result
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
-MODEL = os.environ.get("MODEL", "openrouter/free")
+# Model is managed internally — never exposed to users
+_raw_model = os.environ.get("MODEL", "")
+MODEL = "arcee-ai/trinity-large-preview:free" if (not _raw_model or _raw_model.strip() == "openrouter/free") else _raw_model
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # ── License system ────────────────────────────────────────────────────────────
@@ -275,7 +277,7 @@ def chat():
     data = request.json
     session_id = data.get("session_id", "default")
     user_message = data.get("message", "")
-    model = data.get("model", MODEL)
+    model = MODEL  # model is managed internally — user cannot override
 
     if not OPENROUTER_API_KEY:
         return jsonify({"error": "OPENROUTER_API_KEY not set on server"}), 400
