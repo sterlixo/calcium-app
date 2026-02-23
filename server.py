@@ -42,10 +42,35 @@ API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # ── License system ────────────────────────────────────────────────────────────
 LICENSE_KEY = os.environ.get("LICENSE_KEY", "")
-MASTER_KEY  = "CALCIUM-STERLIN-2026-XKTZ"   # only you know this
+MASTER_KEY  = "CALCIUM-STERLIN-2026-XKTZ"
 
 def is_licensed():
     return LICENSE_KEY == MASTER_KEY
+
+# ── Supabase user management ──────────────────────────────────────────────────
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
+
+def is_user_allowed(username: str) -> bool:
+    """Check if username is allowed in Supabase. Falls back to True if Supabase not configured."""
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        return True  # no Supabase configured — allow everyone
+    try:
+        resp = requests.get(
+            f"{SUPABASE_URL}/rest/v1/allowed_users",
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json"
+            },
+            params={"username": f"eq.{username}", "allowed": "eq.true"},
+            timeout=5
+        )
+        data = resp.json()
+        return len(data) > 0
+    except Exception as e:
+        print(f"[SUPABASE] Check failed for {username}: {e}")
+        return True  # fail open — don't lock users out if Supabase is down
 
 SYSTEM_PROMPT = """You are Calci, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
 
@@ -287,7 +312,13 @@ def login_page():
 @app.route("/api/auth/login", methods=["POST"])
 def api_login():
     data = request.json
-    result = verify_login(data.get("username",""), data.get("password",""))
+    username = data.get("username","")
+
+    # Check Supabase allowlist first
+    if not is_user_allowed(username):
+        return jsonify({"success": False, "message": "Access denied — contact the administrator"}), 403
+
+    result = verify_login(username, data.get("password",""))
     return jsonify(result), 200 if result["success"] else 401
 
 @app.route("/api/auth/logout", methods=["POST"])
