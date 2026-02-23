@@ -229,13 +229,7 @@ def run_command():
     if not command:
         return jsonify({"error": "No command provided"}), 400
 
-    # Check tool against allowlist
-    tool = command.split()[0]
-    if tool not in ALLOWED_TOOLS:
-        return jsonify({
-            "error": f"Tool '{tool}' not in allowed list. Use the CLI (copilot.py) for additional tools.",
-            "allowed_tools": sorted(ALLOWED_TOOLS)
-        }), 403
+    # All tools allowed — only block dangerous patterns below
 
     # Check for destructive patterns
     safe, reason = is_command_safe(command)
