@@ -690,6 +690,15 @@ header {
   .udel { background:transparent; border:1px solid rgba(255,50,80,0.2); color:rgba(255,80,100,0.5);
     font-family:var(--mono); font-size:0.62rem; padding:2px 7px; cursor:pointer; transition:all 0.15s; }
   .udel:hover { border-color:var(--red); color:var(--red); background:rgba(255,50,80,0.08); }
+  .uban { background:transparent; border:1px solid rgba(255,140,0,0.25); color:rgba(255,140,0,0.65);
+    font-family:var(--mono); font-size:0.62rem; padding:2px 7px; cursor:pointer; transition:all 0.15s; margin-right:3px; }
+  .uban:hover { border-color:#ff8c00; color:#ff8c00; background:rgba(255,140,0,0.08); }
+  .uunban { background:transparent; border:1px solid rgba(0,200,100,0.25); color:rgba(0,200,100,0.65);
+    font-family:var(--mono); font-size:0.62rem; padding:2px 7px; cursor:pointer; transition:all 0.15s; margin-right:3px; }
+  .uunban:hover { border-color:#00c864; color:#00c864; background:rgba(0,200,100,0.08); }
+  .ubanned-tag { background:rgba(255,50,80,0.08); color:rgba(255,80,100,0.6);
+    border:1px solid rgba(255,50,80,0.2); font-family:var(--mono); font-size:0.58rem;
+    padding:1px 5px; border-radius:2px; margin-right:4px; letter-spacing:0.5px; }
 </style>
 </head>
 <body>
@@ -1467,23 +1476,40 @@ function closeAdmin() {
 async function loadAdminUsers() {
   const tbody = document.getElementById('adminUsersList');
   try {
-    const resp = await fetch('/api/auth/users', { headers: { 'X-Auth-Token': getToken() } });
-    const data = await resp.json();
+    const [usersResp, gistResp] = await Promise.all([
+      fetch('/api/auth/users', { headers: { 'X-Auth-Token': getToken() } }),
+      fetch('/api/auth/gist',  { headers: { 'X-Auth-Token': getToken() } })
+    ]);
+    const data     = await usersResp.json();
+    const gistData = await gistResp.json();
     if (data.error || !data.users) {
       tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red);text-align:center;padding:12px">${data.error || 'Failed to load'}</td></tr>`;
       return;
     }
-    const me = getUsername();
-    tbody.innerHTML = data.users.map(u => `
-      <tr>
-        <td style="color:var(--cyan);font-weight:600">${u.username}</td>
+    const me     = getUsername();
+    const banned = gistData.banned || [];
+    tbody.innerHTML = data.users.map(u => {
+      const isBanned = banned.includes(u.username);
+      let actions;
+      if (u.username === me) {
+        actions = `<span style="color:var(--dim);font-size:0.65rem">(you)</span>`;
+      } else if (isBanned) {
+        actions = `
+          <span class="ubanned-tag">BANNED</span>
+          <button class="uunban" onclick="adminUnbanUser('${u.username}')">UNBAN</button>
+          <button class="udel"   onclick="adminDeleteUser('${u.username}')">DEL</button>`;
+      } else {
+        actions = `
+          <button class="uban" onclick="adminBanUser('${u.username}')">BAN</button>
+          <button class="udel" onclick="adminDeleteUser('${u.username}')">DEL</button>`;
+      }
+      return `<tr>
+        <td style="color:${isBanned ? 'rgba(255,80,100,0.55)' : 'var(--cyan)'};font-weight:600">${u.username}</td>
         <td><span class="utag utag-${u.role}">${u.role}</span></td>
         <td style="color:var(--dim);font-size:0.7rem">${u.last_login ? u.last_login.slice(0,16).replace('T',' ') : 'Never'}</td>
-        <td>${u.username !== me
-          ? `<button class="udel" onclick="adminDeleteUser('${u.username}')">DEL</button>`
-          : `<span style="color:var(--dim);font-size:0.65rem">(you)</span>`}</td>
-      </tr>
-    `).join('');
+        <td style="white-space:nowrap">${actions}</td>
+      </tr>`;
+    }).join('');
   } catch(e) {
     tbody.innerHTML = `<tr><td colspan="4" style="color:var(--red);text-align:center;padding:12px">Connection error</td></tr>`;
   }
@@ -1519,6 +1545,35 @@ async function adminDeleteUser(username) {
   const msg = document.getElementById('adminModalMsg');
   try {
     const resp = await fetch('/api/auth/users/delete', {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ username })
+    });
+    const data = await resp.json();
+    msg.className = `modal-msg ${data.success ? 'ok' : 'err'}`;
+    msg.textContent = data.message || data.error;
+    if (data.success) loadAdminUsers();
+  } catch(e) { msg.className='modal-msg err'; msg.textContent='Connection error'; }
+}
+
+async function adminBanUser(username) {
+  if (!confirm(`Ban "${username}"? They will be blocked from logging in everywhere.`)) return;
+  const msg = document.getElementById('adminModalMsg');
+  try {
+    const resp = await fetch('/api/auth/users/ban', {
+      method:'POST', headers: authHeaders(),
+      body: JSON.stringify({ username })
+    });
+    const data = await resp.json();
+    msg.className = `modal-msg ${data.success ? 'ok' : 'err'}`;
+    msg.textContent = data.message || data.error;
+    if (data.success) loadAdminUsers();
+  } catch(e) { msg.className='modal-msg err'; msg.textContent='Connection error'; }
+}
+
+async function adminUnbanUser(username) {
+  const msg = document.getElementById('adminModalMsg');
+  try {
+    const resp = await fetch('/api/auth/users/unban', {
       method:'POST', headers: authHeaders(),
       body: JSON.stringify({ username })
     });
