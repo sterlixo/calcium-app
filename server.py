@@ -40,6 +40,13 @@ OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 MODEL = os.environ.get("MODEL", "openrouter/free")
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
+# ── License system ────────────────────────────────────────────────────────────
+LICENSE_KEY = os.environ.get("LICENSE_KEY", "")
+MASTER_KEY  = "CALCIUM-STERLIN-2026-XKTZ"   # only you know this
+
+def is_licensed():
+    return LICENSE_KEY == MASTER_KEY
+
 SYSTEM_PROMPT = """You are Calci, an expert AI assistant for ethical penetration testers and security researchers working on Kali Linux.
 
 You help with:
@@ -300,6 +307,8 @@ def api_list_users():
     auth = require_auth()
     if not auth or auth["role"] != "admin":
         return jsonify({"error": "Admin only"}), 403
+    if not is_licensed():
+        return jsonify({"error": "License required — admin features are locked"}), 403
     return jsonify({"users": list_users()})
 
 @app.route("/api/auth/users/create", methods=["POST"])
@@ -307,6 +316,8 @@ def api_create_user():
     auth = require_auth()
     if not auth or auth["role"] != "admin":
         return jsonify({"error": "Admin only"}), 403
+    if not is_licensed():
+        return jsonify({"error": "License required — admin features are locked"}), 403
     data = request.json
     result = create_user(data.get("username",""), data.get("password",""), data.get("role","user"))
     return jsonify(result), 200 if result["success"] else 400
@@ -316,6 +327,8 @@ def api_delete_user():
     auth = require_auth()
     if not auth or auth["role"] != "admin":
         return jsonify({"error": "Admin only"}), 403
+    if not is_licensed():
+        return jsonify({"error": "License required — admin features are locked"}), 403
     data = request.json
     if data.get("username") == auth["username"]:
         return jsonify({"success": False, "message": "Cannot delete yourself"}), 400
