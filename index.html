@@ -1285,7 +1285,7 @@ const TOOL_CMDS = {
   'ssh':           ['ssh user@<target>','ssh -L 8080:localhost:80 user@<target>','ssh -D 1080 user@<target>'],
   'curl':          ['curl -I http://<target>','curl -X POST -d "data" http://<target>','curl -b "cookie=val" http://<target>'],
   'openssl':       ['openssl s_client -connect <target>:443','openssl x509 -in cert.pem -text'],
-  'python3':       ['python3 -m http.server 8080','python3 -c "import pty;pty.spawn('/bin/bash')"'],
+  'python3':       ['python3 -m http.server 8080','python3 -c "import pty; pty.spawn(\'/bin/bash\')"'],
 };
 
 function showToolCmds(toolName) {
@@ -1300,11 +1300,15 @@ function showToolCmds(toolName) {
   }
 
   title.textContent = '$ ' + toolName;
-  panel.innerHTML = cmds.map(cmd =>
-    `<div class="cmd-line" onclick="document.getElementById('cmdInput').value='${cmd.replace(/'/g,"\'")}'" title="Click to paste">
-      <span class="cmd-dollar">$</span>${cmd}
-    </div>`
-  ).join('');
+  panel.innerHTML = '';
+  cmds.forEach(cmd => {
+    const div = document.createElement('div');
+    div.className = 'cmd-line';
+    div.title = 'Click to paste';
+    div.innerHTML = `<span class="cmd-dollar">$</span>${escapeHtml(cmd)}`;
+    div.onclick = () => { document.getElementById('cmdInput').value = cmd; };
+    panel.appendChild(div);
+  });
 }
 
 function quickPrompt(text, toolName) {
