@@ -19,7 +19,7 @@ An AI-powered security research assistant for Kali Linux.
 
 ### Step 1 — Clone the repo
 ```bash
-git clone https://github.com/sterlixo/calci.git
+git clone https://github.com/sterlixo/calcium-app.git
 cd calci
 ```
 
