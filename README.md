@@ -1,7 +1,7 @@
 # ⚡ Calcium — AI Pentesting Assistant for Kali Linux
 
 An AI-powered security research assistant for Kali Linux.  
-                                                          user:dev       pass:123456   
+                                                           
 ![Calcium Screenshot](screenshot.png)
 
 ---
@@ -61,7 +61,7 @@ npm start
 
 ### Step 6 — Login
 
-> Contact the administrator to get your login credentials.
+> user:dev       pass:123456  
 
 ---
 
